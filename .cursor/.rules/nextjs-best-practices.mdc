@@ -1,0 +1,305 @@
+---
+description: Best practices для Next.js разработки
+alwaysApply: true
+---
+
+# Next.js Best Practices
+
+## TypeScript конфигурация
+
+### tsconfig.json
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+```
+
+## Environment Variables
+
+### .env.local (не коммитить)
+
+```env
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+
+# Auth
+JWT_SECRET="your-secret-key"
+JWT_REFRESH_SECRET="your-refresh-secret-key"
+
+# Next.js
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+### Использование в коде
+
+```typescript
+// Server-side (Route Handlers, Server Components, Server Actions)
+const dbUrl = process.env.DATABASE_URL;
+
+// Client-side (только с префиксом NEXT_PUBLIC_)
+const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+```
+
+## Импорты и пути
+
+### Используйте path aliases
+
+```typescript
+// ✅ GOOD
+import { prisma } from '@/lib/prisma';
+import { Button } from '@/components/ui/Button';
+
+// ❌ BAD
+import { prisma } from '../../../lib/prisma';
+```
+
+## Обработка ошибок
+
+### В Route Handlers
+
+```typescript
+export async function GET(request: NextRequest) {
+  try {
+    // Logic
+  } catch (error) {
+    console.error('Error:', error);
+    
+    // Типизированная обработка
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { message: 'Validation error', errors: error.errors },
+        { status: 400 }
+      );
+    }
+    
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      // Handle Prisma errors
+    }
+    
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+### В Server Components
+
+```tsx
+export default async function Page() {
+  try {
+    const data = await fetchData();
+    return <div>{data}</div>;
+  } catch (error) {
+    return <div>Error loading data</div>;
+  }
+}
+```
+
+## Оптимизация производительности
+
+### 1. Используйте Server Components по умолчанию
+
+```tsx
+// ✅ GOOD - Server Component (по умолчанию)
+export default async function Page() {
+  const data = await prisma.feedback.findMany();
+  return <FeedbackList data={data} />;
+}
+
+// ❌ BAD - Client Component без необходимости
+'use client';
+export default function Page() {
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    fetch('/api/feedback').then(res => res.json()).then(setData);
+  }, []);
+  return <FeedbackList data={data} />;
+}
+```
+
+### 2. Используйте динамические импорты для больших компонентов
+
+```tsx
+import dynamic from 'next/dynamic';
+
+const HeavyComponent = dynamic(() => import('@/components/HeavyComponent'), {
+  loading: () => <p>Loading...</p>,
+  ssr: false, // Если не нужен SSR
+});
+```
+
+### 3. Используйте `revalidatePath` и `revalidateTag` для кэширования
+
+```typescript
+'use server';
+
+import { revalidatePath } from 'next/cache';
+
+export async function updateData() {
+  await prisma.data.update({ /* ... */ });
+  revalidatePath('/dashboard'); // Инвалидировать кэш страницы
+}
+```
+
+## Безопасность
+
+### 1. Валидация всех входных данных
+
+```typescript
+import { z } from 'zod';
+
+const Schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+  const data = Schema.parse(body); // Валидация
+}
+```
+
+### 2. Защита API routes
+
+```typescript
+// middleware.ts
+export function middleware(request: NextRequest) {
+  const token = request.cookies.get('accessToken');
+  
+  if (request.nextUrl.pathname.startsWith('/api/protected')) {
+    if (!token) {
+      return NextResponse.json(
+        { message: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+  }
+}
+```
+
+### 3. Безопасные cookies
+
+```typescript
+import { cookies } from 'next/headers';
+
+const cookieStore = await cookies();
+cookieStore.set('accessToken', token, {
+  httpOnly: true,        // Не доступен из JavaScript
+  secure: process.env.NODE_ENV === 'production', // HTTPS only в production
+  sameSite: 'lax',       // CSRF protection
+  maxAge: 60 * 60 * 24 * 7, // 7 days
+});
+```
+
+## Тестирование
+
+### Структура тестов
+
+```
+__tests__/
+  ├── api/
+  │   └── auth.test.ts
+  ├── components/
+  │   └── Button.test.tsx
+  └── lib/
+      └── auth.test.ts
+```
+
+### Пример теста Route Handler
+
+```typescript
+import { POST } from '@/app/api/auth/login/route';
+import { NextRequest } from 'next/server';
+
+describe('POST /api/auth/login', () => {
+  it('should login with valid credentials', async () => {
+    const request = new NextRequest('http://localhost/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: 'test@example.com',
+        password: 'password123',
+      }),
+    });
+    
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+  });
+});
+```
+
+## Логирование
+
+### Используйте структурированное логирование
+
+```typescript
+// src/lib/logger.ts
+export const logger = {
+  info: (message: string, meta?: object) => {
+    console.log(JSON.stringify({ level: 'info', message, ...meta }));
+  },
+  error: (message: string, error?: Error, meta?: object) => {
+    console.error(JSON.stringify({
+      level: 'error',
+      message,
+      error: error?.message,
+      stack: error?.stack,
+      ...meta,
+    }));
+  },
+};
+
+// Использование
+logger.info('User logged in', { userId: user.id });
+logger.error('Database error', error, { query: 'findMany' });
+```
+
+## Code Style
+
+1. ✅ Используйте функциональные компоненты
+2. ✅ Используйте async/await вместо промисов
+3. ✅ Типизируйте все props и функции
+4. ✅ Используйте const assertions где возможно
+5. ✅ Разделяйте Server и Client Components явно
+6. ✅ Используйте named exports для компонентов
+7. ❌ Не используйте default exports для утилит
+8. ❌ Не смешивайте Server и Client логику в одном файле
+
+## Checklist для миграции
+
+- [ ] Настроен `tsconfig.json` с path aliases
+- [ ] Создан Prisma singleton в `src/lib/prisma.ts`
+- [ ] Настроены environment variables
+- [ ] Мигрированы Express routes в Route Handlers
+- [ ] Мигрированы EJS шаблоны в React Components
+- [ ] Настроен Next.js middleware для защиты маршрутов
+- [ ] Валидация с Zod интегрирована в Route Handlers
+- [ ] Обработка ошибок реализована во всех Route Handlers
+- [ ] Server Actions используются для форм
+- [ ] Кэширование настроено с `revalidatePath`

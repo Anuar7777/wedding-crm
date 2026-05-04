@@ -1,0 +1,173 @@
+---
+description: Структура проекта Next.js после миграции
+alwaysApply: true
+---
+
+# Структура проекта Next.js
+
+## Рекомендуемая структура
+
+```
+project-root/
+├── app/                          # App Router (Next.js 13+)
+│   ├── (auth)/                  # Route groups
+│   │   ├── login/
+│   │   │   └── page.tsx
+│   │   └── register/
+│   │       └── page.tsx
+│   ├── api/                     # API Routes
+│   │   ├── auth/
+│   │   │   ├── login/
+│   │   │   │   └── route.ts
+│   │   │   ├── logout/
+│   │   │   │   └── route.ts
+│   │   │   └── me/
+│   │   │       └── route.ts
+│   │   ├── feedback/
+│   │   │   ├── route.ts         # GET, POST /api/feedback
+│   │   │   └── [id]/
+│   │   │       └── route.ts     # GET, PUT, DELETE /api/feedback/:id
+│   │   └── admin/
+│   │       └── users/
+│   │           └── route.ts
+│   ├── dashboard/
+│   │   └── page.tsx
+│   ├── layout.tsx               # Root layout
+│   ├── page.tsx                 # Home page
+│   └── globals.css
+├── src/
+│   ├── components/              # React компоненты
+│   │   ├── ui/                  # Переиспользуемые UI компоненты
+│   │   │   ├── Button.tsx
+│   │   │   ├── Input.tsx
+│   │   │   └── Card.tsx
+│   │   ├── forms/               # Формы
+│   │   │   └── FeedbackForm.tsx
+│   │   └── layout/              # Layout компоненты
+│   │       ├── Header.tsx
+│   │       └── Footer.tsx
+│   ├── lib/                     # Утилиты и сервисы
+│   │   ├── prisma.ts            # Prisma client singleton
+│   │   ├── auth.ts              # Auth utilities
+│   │   ├── validators/          # Zod schemas
+│   │   │   ├── auth.validator.ts
+│   │   │   └── feedback.validator.ts
+│   │   └── utils.ts             # Общие утилиты
+│   ├── services/                # Business logic (опционально)
+│   │   ├── auth.service.ts
+│   │   └── feedback.service.ts
+│   └── types/                   # TypeScript типы
+│       ├── index.ts
+│       └── prisma.d.ts
+├── prisma/
+│   ├── schema.prisma
+│   └── migrations/
+├── public/                      # Статические файлы
+│   ├── images/
+│   └── favicon.ico
+├── middleware.ts                # Next.js middleware
+├── next.config.js               # Next.js конфигурация
+├── tsconfig.json
+├── package.json
+└── .env.local                   # Environment variables
+```
+
+## Маппинг Express → Next.js
+
+### Express структура → Next.js структура
+
+| Express | Next.js |
+|---------|---------|
+| `src/routes/*.routes.ts` | `app/api/*/route.ts` |
+| `src/controllers/*.controller.ts` | Логика в `route.ts` или `src/services/` |
+| `src/middleware/*.middleware.ts` | `middleware.ts` или helper функции в `src/lib/` |
+| `src/validators/*.validator.ts` | `src/lib/validators/*.validator.ts` |
+| `src/services/*.service.ts` | `src/services/*.service.ts` (без изменений) |
+| `views/*.ejs` | `app/**/page.tsx` (Server/Client Components) |
+| `views/partials/*.ejs` | `src/components/**/*.tsx` |
+| `public/*` | `public/*` (без изменений) |
+| `prisma/schema.prisma` | `prisma/schema.prisma` (без изменений) |
+
+## Организация кода
+
+### 1. API Routes (Route Handlers)
+
+```
+app/api/
+  ├── auth/
+  │   ├── login/route.ts
+  │   ├── logout/route.ts
+  │   └── me/route.ts
+  ├── feedback/
+  │   ├── route.ts              # GET, POST
+  │   └── [id]/route.ts         # GET, PUT, DELETE
+  └── admin/
+      └── users/route.ts
+```
+
+### 2. Страницы (Pages)
+
+```
+app/
+  ├── page.tsx                  # Home (/)
+  ├── login/page.tsx            # /login
+  ├── dashboard/page.tsx        # /dashboard
+  ├── feedback/
+  │   ├── form/page.tsx        # /feedback/form
+  │   └── list/page.tsx        # /feedback/list
+  └── admin/
+      └── users/page.tsx       # /admin/users
+```
+
+### 3. Компоненты
+
+```
+src/components/
+  ├── ui/                       # Базовые UI компоненты
+  ├── forms/                    # Формы
+  ├── layout/                   # Layout компоненты
+  └── features/                 # Feature-specific компоненты
+      ├── feedback/
+      └── auth/
+```
+
+### 4. Утилиты и сервисы
+
+```
+src/lib/
+  ├── prisma.ts                 # Prisma singleton
+  ├── auth.ts                   # Auth helpers
+  ├── validators/               # Zod schemas
+  └── utils.ts                  # Общие утилиты
+
+src/services/                   # Business logic
+  ├── auth.service.ts
+  └── feedback.service.ts
+```
+
+## Route Groups
+
+Используйте route groups `(group)` для организации без влияния на URL:
+
+```
+app/
+  ├── (auth)/
+  │   ├── login/page.tsx        # /login (не /(auth)/login)
+  │   └── register/page.tsx     # /register
+  ├── (dashboard)/
+  │   ├── dashboard/page.tsx    # /dashboard
+  │   └── profile/page.tsx      # /profile
+  └── layout.tsx
+```
+
+## Best Practices
+
+1. ✅ Используйте App Router (Next.js 13+)
+2. ✅ Группируйте связанные routes в папки
+3. ✅ Выносите переиспользуемые компоненты в `src/components/`
+4. ✅ Храните бизнес-логику в `src/services/`
+5. ✅ Используйте `src/lib/` для утилит и конфигурации
+6. ✅ Разделяйте Server и Client Components
+7. ✅ Используйте route groups для организации без изменения URL
+8. ❌ Не смешивайте Pages Router и App Router
+9. ❌ Не создавайте глубокую вложенность папок

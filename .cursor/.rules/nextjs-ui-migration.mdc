@@ -1,0 +1,285 @@
+---
+description: Миграция EJS шаблонов в React компоненты Next.js
+globs: app/**/*.tsx, src/components/**/*.tsx
+alwaysApply: false
+---
+
+# Миграция EJS → React Server/Client Components
+
+## Архитектура Next.js UI
+
+### Server Components (по умолчанию)
+- Выполняются на сервере
+- Могут напрямую обращаться к БД
+- Не могут использовать hooks (`useState`, `useEffect`)
+- Идеально для статического контента и данных из БД
+
+### Client Components (`'use client'`)
+- Выполняются в браузере
+- Могут использовать hooks и браузерные API
+- Идеально для интерактивности
+
+## EJS → React Components
+
+### Express + EJS:
+```ejs
+<!-- views/feedback-form.ejs -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Feedback Form</title>
+</head>
+<body>
+  <form action="/submit" method="POST">
+    <input name="message" required>
+    <button type="submit">Submit</button>
+  </form>
+</body>
+</html>
+```
+
+### Next.js Server Component:
+```tsx
+// app/feedback/form/page.tsx
+export default async function FeedbackFormPage() {
+  return (
+    <form action="/api/feedback/submit" method="POST">
+      <input name="message" required />
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+```
+
+### Next.js Client Component (для интерактивности):
+```tsx
+// app/feedback/form/page.tsx
+'use client';
+
+import { useState } from 'react';
+
+export default function FeedbackFormPage() {
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const res = await fetch('/api/feedback/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }),
+      });
+      
+      if (res.ok) {
+        alert('Success!');
+        setMessage('');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        required
+      />
+      <button type="submit" disabled={loading}>
+        {loading ? 'Submitting...' : 'Submit'}
+      </button>
+    </form>
+  );
+}
+```
+
+## Server Actions (рекомендуемый подход)
+
+```tsx
+// app/feedback/form/page.tsx
+import { redirect } from 'next/navigation';
+import { submitFeedback } from './actions';
+
+export default function FeedbackFormPage() {
+  return (
+    <form action={submitFeedback}>
+      <input name="message" required />
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+
+// app/feedback/form/actions.ts
+'use server';
+
+import { z } from 'zod';
+import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+
+const FeedbackSchema = z.object({
+  message: z.string().min(1),
+});
+
+export async function submitFeedback(formData: FormData) {
+  const message = formData.get('message');
+  
+  const validatedData = FeedbackSchema.parse({ message });
+  
+  await prisma.feedback.create({
+    data: {
+      message: validatedData.message,
+      userId: 'current-user-id', // Get from session
+    },
+  });
+  
+  revalidatePath('/feedback/list');
+  redirect('/feedback/list');
+}
+```
+
+## Работа с данными из БД
+
+### Express + EJS:
+```typescript
+// controller
+const feedbacks = await prisma.feedback.findMany();
+res.render('feedback-list', { feedbacks });
+```
+
+```ejs
+<!-- views/feedback-list.ejs -->
+<% feedbacks.forEach(feedback => { %>
+  <div><%= feedback.message %></div>
+<% }); %>
+```
+
+### Next.js Server Component:
+```tsx
+// app/feedback/list/page.tsx
+import { prisma } from '@/lib/prisma';
+
+export default async function FeedbackListPage() {
+  const feedbacks = await prisma.feedback.findMany({
+    include: { user: true },
+  });
+
+  return (
+    <div>
+      {feedbacks.map((feedback) => (
+        <div key={feedback.id}>
+          <p>{feedback.message}</p>
+          <small>{feedback.user.email}</small>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+## Layouts и Partials
+
+### Express + EJS:
+```ejs
+<!-- views/partials/header.ejs -->
+<header>...</header>
+
+<!-- views/layout.ejs -->
+<%- include('partials/header') %>
+<%- body %>
+```
+
+### Next.js:
+```tsx
+// app/layout.tsx (root layout)
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="ru">
+      <body>
+        <Header />
+        {children}
+        <Footer />
+      </body>
+    </html>
+  );
+}
+
+// src/components/Header.tsx
+export function Header() {
+  return <header>...</header>;
+}
+```
+
+## Аутентификация в компонентах
+
+### Server Component:
+```tsx
+// app/dashboard/page.tsx
+import { cookies } from 'next/headers';
+import { verifyAccessToken } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+
+export default async function DashboardPage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('accessToken')?.value;
+  
+  if (!token) {
+    redirect('/login');
+  }
+  
+  try {
+    const { userId } = verifyAccessToken(token);
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    
+    return <div>Welcome, {user?.email}</div>;
+  } catch {
+    redirect('/login');
+  }
+}
+```
+
+### Client Component:
+```tsx
+// app/dashboard/page.tsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function DashboardPage() {
+  const router = useRouter();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((res) => {
+        if (!res.ok) router.push('/login');
+        return res.json();
+      })
+      .then(setUser);
+  }, [router]);
+
+  if (!user) return <div>Loading...</div>;
+  
+  return <div>Welcome, {user.email}</div>;
+}
+```
+
+## Best Practices
+
+1. ✅ Используйте Server Components по умолчанию
+2. ✅ Используйте Client Components только для интерактивности
+3. ✅ Используйте Server Actions для форм
+4. ✅ Выполняйте запросы к БД напрямую в Server Components
+5. ✅ Используйте `revalidatePath` и `revalidateTag` для инвалидации кэша
+6. ✅ Разделяйте компоненты на переиспользуемые части в `src/components/`
+7. ❌ Не используйте `'use client'` без необходимости
+8. ❌ Не делайте запросы к API из Server Components (используйте прямой доступ к БД)

@@ -1,0 +1,24 @@
+{
+	"name": "wedding-crm",
+	"private": true,
+	"packageManager": "yarn@1.22.22",
+	"workspaces": [
+		"backend",
+		"frontend"
+	],
+	"scripts": {
+		"prepare": "husky",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"lint:backend": "yarn workspace backend lint",
+		"lint:frontend": "yarn workspace frontend lint"
+	},
+	"devDependencies": {
+		"husky": "^9.1.7",
+		"lint-staged": "^15.4.3",
+		"prettier": "^3.4.2"
+	},
+	"lint-staged": {
+		"*.{ts,tsx,js,jsx,mjs,cjs,json,md,css,yml,yaml}": "prettier --write"
+	}
+}
