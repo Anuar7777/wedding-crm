@@ -28,11 +28,16 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Generate Prisma client (backend)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: yarn workspace backend prisma:generate
+
       - name: Run ESLint (backend)
         run: yarn workspace backend lint
 
       - name: Check Prettier formatting (backend)
-        run: yarn prettier --check "backend/src/**/*.ts" "backend/test/**/*.ts"
+        run: yarn workspace backend format:check
 
   lint-frontend:
     runs-on: ubuntu-latest
