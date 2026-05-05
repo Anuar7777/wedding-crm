@@ -2,6 +2,7 @@ import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@
 import { Reflector } from '@nestjs/core'
 import { UserRole } from '@prisma/client'
 import { ROLES_KEY } from '../decorators/roles.decorator'
+import { AuthenticatedUser } from '../types/authenticated-user.interface'
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -17,7 +18,7 @@ export class RolesGuard implements CanActivate {
 			return true
 		}
 
-		const { user } = context.switchToHttp().getRequest()
+		const { user } = context.switchToHttp().getRequest<{ user?: AuthenticatedUser }>()
 
 		if (!user) {
 			throw new ForbiddenException('No user found in request')

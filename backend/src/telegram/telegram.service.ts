@@ -50,8 +50,9 @@ export class TelegramService {
 					parse_mode: 'Markdown',
 				})
 			)
-		} catch (error) {
-			this.logger.error(`Failed to send Telegram message to ${chatId}: ${error.message}`)
+		} catch (error: unknown) {
+			const errorMessage = error instanceof Error ? error.message : String(error)
+			this.logger.error(`Failed to send Telegram message to ${chatId}: ${errorMessage}`)
 		}
 	}
 

@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/c
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import * as argon2 from 'argon2'
+import { type StringValue } from 'ms'
 import { PrismaService } from '../prisma/prisma.service'
 import { LoginDto } from './dto/login.dto'
 
@@ -93,17 +94,17 @@ export class AuthService {
 	private async generateTokens(userId: string, email: string) {
 		const payload = { sub: userId, email }
 
-		const accessExpiration = this.configService.getOrThrow<string>('JWT_ACCESS_EXPIRATION')
-		const refreshExpiration = this.configService.getOrThrow<string>('JWT_REFRESH_EXPIRATION')
+		const accessExpiration = this.configService.getOrThrow<StringValue>('JWT_ACCESS_EXPIRATION')
+		const refreshExpiration = this.configService.getOrThrow<StringValue>('JWT_REFRESH_EXPIRATION')
 
 		const [accessToken, refreshToken] = await Promise.all([
 			this.jwtService.signAsync(payload, {
 				secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
-				expiresIn: accessExpiration as any,
+				expiresIn: accessExpiration,
 			}),
 			this.jwtService.signAsync(payload, {
 				secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
-				expiresIn: refreshExpiration as any,
+				expiresIn: refreshExpiration,
 			}),
 		])
 

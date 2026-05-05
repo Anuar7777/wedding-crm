@@ -28,21 +28,21 @@ export class TagsController {
 
 	@Post()
 	@ApiOperation({ summary: 'Create a new tag' })
-	create(@Body() dto: CreateTagDto, @CurrentUser('scope') scope: string | null) {
-		return this.tagsService.create(dto, scope as any)
+	create(@Body() dto: CreateTagDto, @CurrentUser('scope') scope: EventType | null) {
+		return this.tagsService.create(dto, scope)
 	}
 
 	@Get()
 	@ApiOperation({ summary: 'List tags (filtered by event type)' })
 	@ApiQuery({ name: 'type', enum: EventType, required: false })
-	findAll(@CurrentUser('scope') scope: string | null, @Query('type') type?: EventType) {
-		return this.tagsService.findAll(scope as any, type)
+	findAll(@CurrentUser('scope') scope: EventType | null, @Query('type') type?: EventType) {
+		return this.tagsService.findAll(scope, type)
 	}
 
 	@Get(':id')
 	@ApiOperation({ summary: 'Get a single tag' })
-	findOne(@Param('id', ParseUUIDPipe) id: string, @CurrentUser('scope') scope: string | null) {
-		return this.tagsService.findOne(id, scope as any)
+	findOne(@Param('id', ParseUUIDPipe) id: string, @CurrentUser('scope') scope: EventType | null) {
+		return this.tagsService.findOne(id, scope)
 	}
 
 	@Patch(':id')
@@ -50,14 +50,14 @@ export class TagsController {
 	update(
 		@Param('id', ParseUUIDPipe) id: string,
 		@Body() dto: UpdateTagDto,
-		@CurrentUser('scope') scope: string | null
+		@CurrentUser('scope') scope: EventType | null
 	) {
-		return this.tagsService.update(id, dto, scope as any)
+		return this.tagsService.update(id, dto, scope)
 	}
 
 	@Delete(':id')
 	@ApiOperation({ summary: 'Delete a tag' })
-	remove(@Param('id', ParseUUIDPipe) id: string, @CurrentUser('scope') scope: string | null) {
-		return this.tagsService.remove(id, scope as any)
+	remove(@Param('id', ParseUUIDPipe) id: string, @CurrentUser('scope') scope: EventType | null) {
+		return this.tagsService.remove(id, scope)
 	}
 }

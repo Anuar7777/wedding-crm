@@ -11,6 +11,7 @@ import {
 	ParseUUIDPipe,
 } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
+import { EventType } from '@prisma/client'
 import { GuestsService } from './guests.service'
 import { CreateGuestDto } from './dto/create-guest.dto'
 import { UpdateGuestDto } from './dto/update-guest.dto'
@@ -26,48 +27,48 @@ export class GuestsController {
 
 	@Post()
 	@ApiOperation({ summary: 'Create a new guest' })
-	create(@Body() dto: CreateGuestDto, @CurrentUser('scope') scope: string | null) {
-		return this.guestsService.create(dto, scope as any)
+	create(@Body() dto: CreateGuestDto, @CurrentUser('scope') scope: EventType | null) {
+		return this.guestsService.create(dto, scope)
 	}
 
 	@Get()
 	@ApiOperation({ summary: 'List guests with filters and pagination' })
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard, RolesGuard)
-	findAll(@Query() filters: FilterGuestsDto, @CurrentUser('scope') scope: string | null) {
-		return this.guestsService.findAll(filters, scope as any)
+	findAll(@Query() filters: FilterGuestsDto, @CurrentUser('scope') scope: EventType | null) {
+		return this.guestsService.findAll(filters, scope)
 	}
 
 	@Get('stats')
 	@ApiOperation({ summary: 'Get guest statistics' })
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard, RolesGuard)
-	getStats(@CurrentUser('scope') scope: string | null) {
-		return this.guestsService.getStats(scope as any)
+	getStats(@CurrentUser('scope') scope: EventType | null) {
+		return this.guestsService.getStats(scope)
 	}
 
 	@Get('duplicates')
 	@ApiOperation({ summary: 'List flagged duplicate guests' })
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard, RolesGuard)
-	getDuplicates(@CurrentUser('scope') scope: string | null) {
-		return this.guestsService.getDuplicates(scope as any)
+	getDuplicates(@CurrentUser('scope') scope: EventType | null) {
+		return this.guestsService.getDuplicates(scope)
 	}
 
 	@Post('detect-duplicates')
 	@ApiOperation({ summary: 'Detect duplicates for all guests' })
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard, RolesGuard)
-	detectDuplicates(@CurrentUser('scope') scope: string | null) {
-		return this.guestsService.detectDuplicatesForAll(scope as any)
+	detectDuplicates(@CurrentUser('scope') scope: EventType | null) {
+		return this.guestsService.detectDuplicatesForAll(scope)
 	}
 
 	@Get(':id')
 	@ApiOperation({ summary: 'Get a single guest' })
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard, RolesGuard)
-	findOne(@Param('id', ParseUUIDPipe) id: string, @CurrentUser('scope') scope: string | null) {
-		return this.guestsService.findOne(id, scope as any)
+	findOne(@Param('id', ParseUUIDPipe) id: string, @CurrentUser('scope') scope: EventType | null) {
+		return this.guestsService.findOne(id, scope)
 	}
 
 	@Patch(':id')
@@ -77,16 +78,16 @@ export class GuestsController {
 	update(
 		@Param('id', ParseUUIDPipe) id: string,
 		@Body() dto: UpdateGuestDto,
-		@CurrentUser('scope') scope: string | null
+		@CurrentUser('scope') scope: EventType | null
 	) {
-		return this.guestsService.update(id, dto, scope as any)
+		return this.guestsService.update(id, dto, scope)
 	}
 
 	@Delete(':id')
 	@ApiOperation({ summary: 'Delete a guest' })
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard, RolesGuard)
-	remove(@Param('id', ParseUUIDPipe) id: string, @CurrentUser('scope') scope: string | null) {
-		return this.guestsService.remove(id, scope as any)
+	remove(@Param('id', ParseUUIDPipe) id: string, @CurrentUser('scope') scope: EventType | null) {
+		return this.guestsService.remove(id, scope)
 	}
 }

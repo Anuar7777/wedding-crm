@@ -28,21 +28,21 @@ export class TablesController {
 
 	@Post()
 	@ApiOperation({ summary: 'Create a new table' })
-	create(@Body() dto: CreateTableDto, @CurrentUser('scope') scope: string | null) {
-		return this.tablesService.create(dto, scope as any)
+	create(@Body() dto: CreateTableDto, @CurrentUser('scope') scope: EventType | null) {
+		return this.tablesService.create(dto, scope)
 	}
 
 	@Get()
 	@ApiOperation({ summary: 'List tables with occupancy info' })
 	@ApiQuery({ name: 'type', enum: EventType, required: false })
-	findAll(@CurrentUser('scope') scope: string | null, @Query('type') type?: EventType) {
-		return this.tablesService.findAll(scope as any, type)
+	findAll(@CurrentUser('scope') scope: EventType | null, @Query('type') type?: EventType) {
+		return this.tablesService.findAll(scope, type)
 	}
 
 	@Get(':id')
 	@ApiOperation({ summary: 'Get a single table with guests' })
-	findOne(@Param('id', ParseUUIDPipe) id: string, @CurrentUser('scope') scope: string | null) {
-		return this.tablesService.findOne(id, scope as any)
+	findOne(@Param('id', ParseUUIDPipe) id: string, @CurrentUser('scope') scope: EventType | null) {
+		return this.tablesService.findOne(id, scope)
 	}
 
 	@Patch(':id')
@@ -50,15 +50,15 @@ export class TablesController {
 	update(
 		@Param('id', ParseUUIDPipe) id: string,
 		@Body() dto: UpdateTableDto,
-		@CurrentUser('scope') scope: string | null
+		@CurrentUser('scope') scope: EventType | null
 	) {
-		return this.tablesService.update(id, dto, scope as any)
+		return this.tablesService.update(id, dto, scope)
 	}
 
 	@Delete(':id')
 	@ApiOperation({ summary: 'Delete a table' })
-	remove(@Param('id', ParseUUIDPipe) id: string, @CurrentUser('scope') scope: string | null) {
-		return this.tablesService.remove(id, scope as any)
+	remove(@Param('id', ParseUUIDPipe) id: string, @CurrentUser('scope') scope: EventType | null) {
+		return this.tablesService.remove(id, scope)
 	}
 
 	@Post(':tableId/assign/:guestId')
@@ -66,9 +66,9 @@ export class TablesController {
 	assignGuest(
 		@Param('tableId', ParseUUIDPipe) tableId: string,
 		@Param('guestId', ParseUUIDPipe) guestId: string,
-		@CurrentUser('scope') scope: string | null
+		@CurrentUser('scope') scope: EventType | null
 	) {
-		return this.tablesService.assignGuest(tableId, guestId, scope as any)
+		return this.tablesService.assignGuest(tableId, guestId, scope)
 	}
 
 	@Delete(':tableId/assign/:guestId')
@@ -76,8 +76,8 @@ export class TablesController {
 	unassignGuest(
 		@Param('tableId', ParseUUIDPipe) tableId: string,
 		@Param('guestId', ParseUUIDPipe) guestId: string,
-		@CurrentUser('scope') scope: string | null
+		@CurrentUser('scope') scope: EventType | null
 	) {
-		return this.tablesService.unassignGuest(tableId, guestId, scope as any)
+		return this.tablesService.unassignGuest(tableId, guestId, scope)
 	}
 }

@@ -22,7 +22,15 @@ export class FilterGuestsDto extends PaginationDto {
 	@IsOptional()
 	@IsArray()
 	@IsUUID('4', { each: true })
-	@Transform(({ value }) => (typeof value === 'string' ? value.split(',') : value))
+	@Transform(({ value }): string[] | undefined => {
+		if (typeof value === 'string') {
+			return value.split(',')
+		}
+		if (Array.isArray(value) && value.every((item) => typeof item === 'string')) {
+			return value
+		}
+		return undefined
+	})
 	tagIds?: string[]
 
 	@ApiPropertyOptional({ description: 'Search by guest name' })

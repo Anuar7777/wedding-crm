@@ -11,7 +11,8 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"lint:backend": "yarn workspace backend lint",
-		"lint:frontend": "yarn workspace frontend lint"
+		"lint:frontend": "yarn workspace frontend lint",
+		"lint:all": "yarn lint:backend && yarn lint:frontend"
 	},
 	"devDependencies": {
 		"husky": "^9.1.7",
