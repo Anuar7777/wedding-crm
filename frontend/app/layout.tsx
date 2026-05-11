@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Bad_Script, Cormorant_Garamond, Geist_Mono, Noto_Sans } from 'next/font/google'
 import './globals.css'
+import { Providers } from './providers'
 
 const geistMono = Geist_Mono({
 	variable: '--font-geist-mono',
@@ -40,7 +41,9 @@ export default function RootLayout({
 			lang="kk-KZ"
 			className={`${notoSans.variable} ${geistMono.variable} ${cormorant.variable} ${badScript.variable} h-full antialiased`}
 		>
-			<body className="min-h-full flex flex-col">{children}</body>
+			<body className="min-h-full flex flex-col">
+				<Providers>{children}</Providers>
+			</body>
 		</html>
 	)
 }

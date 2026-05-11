@@ -12,7 +12,8 @@
 		"format:check": "prettier --check .",
 		"lint:backend": "yarn workspace backend lint",
 		"lint:frontend": "yarn workspace frontend lint",
-		"lint:all": "yarn lint:backend && yarn lint:frontend"
+		"lint:all": "yarn lint:backend && yarn lint:frontend",
+		"lint": "yarn lint:all"
 	},
 	"devDependencies": {
 		"husky": "^9.1.7",

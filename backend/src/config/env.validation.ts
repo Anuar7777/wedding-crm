@@ -12,4 +12,5 @@ export const envValidationSchema = Joi.object({
 	LOG_STACK: Joi.boolean().truthy('true').falsy('false').default(true),
 	LOG_BODY: Joi.boolean().truthy('true').falsy('false').default(false),
 	LOG_4XX: Joi.boolean().truthy('true').falsy('false').default(true),
+	DEFAULT_RESET_PASSWORD: Joi.string().allow('').optional(),
 })

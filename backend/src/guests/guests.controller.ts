@@ -16,6 +16,10 @@ import { GuestsService } from './guests.service'
 import { CreateGuestDto } from './dto/create-guest.dto'
 import { UpdateGuestDto } from './dto/update-guest.dto'
 import { FilterGuestsDto } from './dto/filter-guests.dto'
+import { StatsQueryDto } from './dto/stats-query.dto'
+import { StatusTimelineQueryDto } from './dto/status-timeline-query.dto'
+import { BulkDeleteGuestsDto } from './dto/bulk-delete-guests.dto'
+import { BulkTagsGuestsDto } from './dto/bulk-tags-guests.dto'
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
 import { RolesGuard } from '../common/guards/roles.guard'
 import { CurrentUser } from '../common/decorators/current-user.decorator'
@@ -43,8 +47,35 @@ export class GuestsController {
 	@ApiOperation({ summary: 'Get guest statistics' })
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard, RolesGuard)
-	getStats(@CurrentUser('scope') scope: EventType | null) {
-		return this.guestsService.getStats(scope)
+	getStats(@Query() statsQuery: StatsQueryDto, @CurrentUser('scope') scope: EventType | null) {
+		return this.guestsService.getStats(scope, statsQuery.type)
+	}
+
+	@Get('status-timeline')
+	@ApiOperation({ summary: 'Daily confirmation events for charts' })
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, RolesGuard)
+	getStatusTimeline(
+		@Query() query: StatusTimelineQueryDto,
+		@CurrentUser('scope') scope: EventType | null
+	) {
+		return this.guestsService.getStatusTimeline(scope, query)
+	}
+
+	@Post('bulk-delete')
+	@ApiOperation({ summary: 'Delete multiple guests' })
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, RolesGuard)
+	bulkDelete(@Body() dto: BulkDeleteGuestsDto, @CurrentUser('scope') scope: EventType | null) {
+		return this.guestsService.bulkDelete(dto, scope)
+	}
+
+	@Patch('bulk-tags')
+	@ApiOperation({ summary: 'Replace tags for multiple guests' })
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, RolesGuard)
+	bulkSetTags(@Body() dto: BulkTagsGuestsDto, @CurrentUser('scope') scope: EventType | null) {
+		return this.guestsService.bulkSetTags(dto, scope)
 	}
 
 	@Get('duplicates')

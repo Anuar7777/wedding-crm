@@ -1,16 +1,31 @@
-import { Controller, Post, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common'
+import { Controller, Post, Get, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { AuthService } from './auth.service'
 import { LoginDto } from './dto/login.dto'
 import { RefreshDto } from './dto/refresh.dto'
 import { TokensResponseDto } from './dto/tokens-response.dto'
 import { JwtRefreshGuard } from '../common/guards/jwt-refresh.guard'
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
 import { CurrentUser } from '../common/decorators/current-user.decorator'
+import type { AuthenticatedUser } from '../common/types/authenticated-user.interface'
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
 	constructor(private authService: AuthService) {}
+
+	@Get('me')
+	@UseGuards(JwtAuthGuard)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Current authenticated user' })
+	me(@CurrentUser() user: AuthenticatedUser) {
+		return {
+			id: user.id,
+			email: user.email,
+			role: user.role,
+			scope: user.scope,
+		}
+	}
 
 	@Post('login')
 	@HttpCode(HttpStatus.OK)

@@ -3,7 +3,8 @@
 import Image from 'next/image'
 import { motion } from 'motion/react'
 import { MapPin } from 'lucide-react'
-import heroImage from '@/Gemini_Generated_Image_f0nuvwf0nuvwf0nu.avif'
+
+const heroImage = '/invitation/wedding.webp'
 import { Countdown } from '@/app/components/invitation/countdown'
 import { RSVPForm } from '@/app/components/invitation/rsvp-form'
 import { Ornament } from '@/app/components/invitation/ornament'
@@ -52,7 +53,7 @@ export function InvitationPageClient() {
 				</motion.div>
 			</section>
 
-			<section className="relative overflow-hidden px-6 py-24 md:py-28">
+			<section className="relative overflow-hidden px-6 py-20 md:py-24">
 				<PetalBackground />
 				<motion.div
 					className="linen-surface luxury-card relative z-10 mx-auto max-w-3xl px-6 py-11 text-center sm:px-8 md:px-14 md:py-16"
@@ -77,7 +78,7 @@ export function InvitationPageClient() {
 				</motion.div>
 			</section>
 
-			<section className="relative overflow-hidden px-6 py-24 md:py-28">
+			<section className="relative overflow-hidden px-6 py-20 md:py-24">
 				<PetalBackground />
 				<motion.div className="relative z-10 mx-auto max-w-3xl text-center" {...fadeIn}>
 					<SectionTitle title="Қай күні?" />
@@ -95,7 +96,7 @@ export function InvitationPageClient() {
 				</motion.div>
 			</section>
 
-			<section className="relative overflow-hidden px-6 py-24 md:py-28">
+			<section className="relative overflow-hidden px-6 py-20 md:py-24">
 				<PetalBackground />
 				<motion.div className="relative z-10 mx-auto max-w-4xl text-center" {...fadeIn}>
 					<SectionTitle title="Мекен-жайы" />
@@ -143,7 +144,7 @@ export function InvitationPageClient() {
 				</motion.div>
 			</section>
 
-			<section className="relative overflow-hidden px-6 py-24 md:py-28">
+			<section className="relative overflow-hidden px-6 py-20 md:py-24">
 				<PetalBackground />
 				<motion.div className="relative z-10 mx-auto max-w-2xl text-center" {...fadeIn}>
 					<Ornament />

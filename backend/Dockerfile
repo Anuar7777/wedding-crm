@@ -35,4 +35,4 @@ WORKDIR /app/backend
 ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000
-CMD ["sh", "-c", "yarn prisma migrate deploy && yarn start:prod"]
+CMD ["sh", "-c", "yarn prisma migrate deploy && yarn prisma db seed && yarn start:prod"]

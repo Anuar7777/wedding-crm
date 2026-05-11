@@ -9,6 +9,7 @@ import {
 	UseGuards,
 	ParseUUIDPipe,
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { UserRole } from '@prisma/client'
 import { UsersService } from './users.service'
@@ -25,7 +26,19 @@ import { Roles } from '../common/decorators/roles.decorator'
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.SUPERADMIN)
 export class UsersController {
-	constructor(private usersService: UsersService) {}
+	constructor(
+		private usersService: UsersService,
+		private config: ConfigService
+	) {}
+
+	@Get('reset-password-default')
+	@ApiOperation({
+		summary: 'Suggested password for reset dialog (from DEFAULT_RESET_PASSWORD env)',
+	})
+	getResetPasswordDefault() {
+		const raw = this.config.get<string>('DEFAULT_RESET_PASSWORD')?.trim() ?? ''
+		return { defaultPassword: raw.length > 0 ? raw : null }
+	}
 
 	@Post()
 	@ApiOperation({ summary: 'Create a new admin user (SuperAdmin only)' })

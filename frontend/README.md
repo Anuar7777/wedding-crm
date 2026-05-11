@@ -1,36 +1,37 @@
-# Wedding CRM Frontend
+# Wedding CRM frontend
 
-## Run locally
+Next.js App Router: public invitation pages and authenticated CRM under `/crm`.
 
-1. From the repository root, install dependencies (workspaces):
+## Environment
+
+Copy `frontend/.env.example` to `frontend/.env.local` and set variables there (or export them in your shell). No values are implied by the repo; you choose URLs and ports for your setup.
+
+| Variable                         | Purpose                                                                                       |
+| -------------------------------- | --------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_BASE_URL`       | Base URL of the Nest API (browser must reach it; include scheme, no trailing slash).          |
+| `NEXT_PUBLIC_INVITE_URL_WEDDING` | Optional. Public base for the main invitation QR/links. Empty uses same-origin `/invitation`. |
+| `NEXT_PUBLIC_INVITE_URL_BRIDE`   | Optional. Public base for the alternate invitation route. Empty uses same-origin `/wXneoFY1`. |
+
+## Run locally (monorepo)
+
+From the repository root:
 
 ```bash
 yarn install
-```
-
-2. Create local env file:
-
-```bash
-cp .env.example .env.local
-```
-
-3. Start dev server:
-
-```bash
+cp frontend/.env.example frontend/.env.local
+# edit frontend/.env.local
 yarn workspace frontend dev
 ```
 
-## Invitation route
+The dev server URL and port are printed by Next.js; open `/` and `/crm` from that origin.
 
-- Main invitation page: `http://localhost:3000/invitation`
-- Landing page: `http://localhost:3000/`
+## Invitation and RSVP
 
-## RSVP backend integration
+- Invitation routes include `/invitation` and `/wXneoFY1` (see `app/`).
+- The RSVP form posts to `POST /api/guests` on the API configured by `NEXT_PUBLIC_API_BASE_URL`.
 
-The invitation form submits to `POST /api/guests` on the backend.
+Payload fields include `fullName`, `type`, `status`, and optional `partnerFullName`.
 
-Set these variables in `.env.local`:
+## Docker
 
-- `NEXT_PUBLIC_API_BASE_URL` - backend base URL (example: `http://localhost:3000`)
-
-The form sends `fullName`, hidden `type`, `status`, and optional `partnerFullName`.
+Stack configuration lives in the repository root. See the root `README.md` for `docker compose` and the root `.env.example` (required for compose; no substituted defaults).

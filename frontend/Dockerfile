@@ -16,7 +16,7 @@ COPY --from=deps /app/backend/package.json ./backend/package.json
 COPY --from=deps /app/frontend/package.json ./frontend/package.json
 COPY frontend ./frontend
 WORKDIR /app/frontend
-ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
+ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 RUN yarn build
 
@@ -30,7 +30,7 @@ RUN yarn install --frozen-lockfile --production
 WORKDIR /app/frontend
 COPY --from=build /app/frontend/.next ./.next
 COPY --from=build /app/frontend/public ./public
-COPY --from=build /app/frontend/next.config.ts ./next.config.ts
+COPY --from=build /app/frontend/next.config.js ./next.config.js
 ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000

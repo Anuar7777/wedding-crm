@@ -1,4 +1,4 @@
-import { IsOptional, IsEnum, IsArray, IsUUID } from 'class-validator'
+import { IsOptional, IsEnum, IsArray, IsUUID, IsBoolean } from 'class-validator'
 import { Transform } from 'class-transformer'
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { EventType, GuestStatus } from '@prisma/client'
@@ -32,6 +32,23 @@ export class FilterGuestsDto extends PaginationDto {
 		return undefined
 	})
 	tagIds?: string[]
+
+	@ApiPropertyOptional({
+		description: 'Filter by assigned table (ignored when unassigned is true)',
+	})
+	@IsOptional()
+	@IsUUID('4')
+	tableId?: string
+
+	@ApiPropertyOptional({ description: 'Only guests with no table (query: unassigned=true)' })
+	@IsOptional()
+	@Transform(({ value }): boolean | undefined => {
+		if (value === true || value === 'true' || value === '1' || value === 1) return true
+		if (value === false || value === 'false' || value === '0' || value === 0) return false
+		return undefined
+	})
+	@IsBoolean()
+	unassigned?: boolean
 
 	@ApiPropertyOptional({ description: 'Search by guest name' })
 	@IsOptional()

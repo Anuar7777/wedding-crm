@@ -66,12 +66,12 @@ export function RSVPForm({ eventType = 'BRIDE_FAREWELL' }: RSVPFormProps) {
 
 	return (
 		<form onSubmit={handleSubmit} className="mx-auto max-w-md space-y-6">
-			<div>
+			<div className="flex flex-col gap-1.25">
 				<input
 					type="text"
 					value={name}
 					onChange={(event) => setName(event.target.value)}
-					placeholder="Атыңыз"
+					placeholder="Аты-жөніңіз"
 					className="ui-input ui-focus w-full px-6 py-4 text-sm sm:text-base"
 					required
 					disabled={isSubmitting}
