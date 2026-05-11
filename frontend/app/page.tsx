@@ -12,7 +12,7 @@ export default function Home() {
 					href="/invitation"
 					className="mt-8 inline-flex rounded-full bg-[var(--accent)] px-6 py-3 text-white transition-opacity hover:opacity-90"
 				>
-					Открыть приглашение
+					Открыть приглашение5
 				</Link>
 			</main>
 		</div>

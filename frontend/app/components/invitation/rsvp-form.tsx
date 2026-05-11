@@ -76,10 +76,8 @@ export function RSVPForm({ eventType = 'BRIDE_FAREWELL' }: RSVPFormProps) {
 					required
 					disabled={isSubmitting}
 				/>
-			</div>
 
-			{isPartnerRequired ? (
-				<div>
+				{isPartnerRequired ? (
 					<input
 						type="text"
 						value={partnerFullName}
@@ -89,8 +87,8 @@ export function RSVPForm({ eventType = 'BRIDE_FAREWELL' }: RSVPFormProps) {
 						required
 						disabled={isSubmitting}
 					/>
-				</div>
-			) : null}
+				) : null}
+			</div>
 
 			<div className="space-y-3">
 				<RadioOption

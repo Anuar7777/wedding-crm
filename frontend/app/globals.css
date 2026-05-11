@@ -147,7 +147,7 @@ body {
 }
 
 .ui-input {
-	border-radius: 9999px;
+	border-radius: var(--radius-2xl);
 	border: 2px solid var(--border);
 	background: rgba(255, 255, 255, 0.78);
 	color: var(--foreground);

@@ -3,13 +3,13 @@
 import Image from 'next/image'
 import { motion } from 'motion/react'
 import { MapPin } from 'lucide-react'
+import heroImage from '@/Gemini_Generated_Image_f0nuvwf0nuvwf0nu.avif'
 import { Countdown } from '@/app/components/invitation/countdown'
 import { RSVPForm } from '@/app/components/invitation/rsvp-form'
 import { Ornament } from '@/app/components/invitation/ornament'
 import { CalendarWithHeart } from '@/app/components/invitation/calendar-with-heart'
 import { MapEmbed } from '@/app/components/invitation/map-embed'
-
-import heroImage from '@/public/invitation/image2.webp'
+import { PetalBackground } from '@/app/components/invitation/petal-background'
 
 export function InvitationPageClient() {
 	const fadeIn = {
@@ -21,36 +21,64 @@ export function InvitationPageClient() {
 
 	return (
 		<div className="min-h-screen bg-background text-foreground">
-			<section className="relative h-screen overflow-hidden">
-				<div className="absolute bottom-0 left-0 w-full flex flex-col items-center text-center pb-10 z-20">
-					<Ornament />
-					<h1 className="text-5xl md:text-8xl" style={{ fontFamily: 'var(--font-script)' }}>
-						Қарақат
-					</h1>
-					<p className="mt-4 text-xl tracking-widest">Қыз ұзату</p>
-					<Ornament />
-				</div>
-			</section>
-
-			<section className="relative overflow-hidden px-6 py-24 md:py-28">
+			<section className="relative min-h-svh overflow-hidden">
+				<Image
+					src={heroImage}
+					alt="Kazakh wedding invitation hero"
+					fill
+					priority
+					className="object-cover object-center"
+					sizes="100vw"
+				/>
+				<div className="absolute inset-0 bg-linear-to-b from-black/10 via-black/25 to-black/45" />
+				<div className="absolute inset-x-0 bottom-0 h-48 bg-linear-to-t from-background to-transparent" />
 				<motion.div
-					className="linen-surface luxury-card relative z-10 mx-auto max-w-3xl px-6 py-11 text-center sm:px-8 md:px-14 md:py-16"
-					{...fadeIn}
+					className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center text-white"
+					initial={{ opacity: 0, y: 40 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 1, ease: 'easeOut' }}
 				>
 					<Ornament />
-					<p className="mx-auto mb-6 max-w-2xl text-base leading-relaxed opacity-85 md:text-lg">
-						Құрметті ағайын-туыс, бауырлар, құда-жекжат, нағашы-жиен, бөлелер, дос-жаран, әріптестер
-						және көршілер!
-					</p>
-					<p className="mx-auto mb-6 max-w-2xl text-base leading-relaxed opacity-85 md:text-lg">
-						Сіздерді қызымыз Қарақаттың ұзату тойына арналған салтанатты ақ дастарханымыздың қадірлі
-						қонағы болуға шақырамыз.
+					<h1
+						className="text-5xl tracking-wide sm:text-6xl md:text-8xl"
+						style={{ fontFamily: 'var(--font-script)' }}
+					>
+						Қарақат
+					</h1>
+					<p className="mt-4 text-xl tracking-[0.22em] sm:text-2xl sm:tracking-[0.3em] md:text-3xl">
+						Қыз ұзату
 					</p>
 					<Ornament />
 				</motion.div>
 			</section>
 
 			<section className="relative overflow-hidden px-6 py-24 md:py-28">
+				<PetalBackground />
+				<motion.div
+					className="linen-surface luxury-card relative z-10 mx-auto max-w-3xl px-6 py-11 text-center sm:px-8 md:px-14 md:py-16"
+					{...fadeIn}
+				>
+					<Ornament />
+					<p
+						className="mb-8 text-lg leading-relaxed md:text-2xl"
+						style={{ fontFamily: 'var(--font-serif)' }}
+					>
+						Құрметті қонақтар!
+					</p>
+					<p className="mx-auto mb-6 max-w-2xl text-base leading-relaxed opacity-85 md:text-lg">
+						Біз сіздерді қызымыздың қыз ұзату тойына шақырамыз. Бұл маңызды күнде бізбен бірге
+						болып, қуаныш пен бақытты бөлісуіңізді өтінеміз.
+					</p>
+					<p className="mx-auto mb-8 max-w-2xl text-base leading-relaxed opacity-80 md:text-lg">
+						Сіздерді дәстүрлі &quot;Қыз ұзату&quot; салтанатына шақырамыз. Отбасымыз үшін ерекше осы
+						күні қуанышымызды бірге бөліссеңіздер, біз үшін үлкен мәртебе.
+					</p>
+					<Ornament />
+				</motion.div>
+			</section>
+
+			<section className="relative overflow-hidden px-6 py-24 md:py-28">
+				<PetalBackground />
 				<motion.div className="relative z-10 mx-auto max-w-3xl text-center" {...fadeIn}>
 					<SectionTitle title="Қай күні?" />
 					<p className="mb-10 text-lg opacity-70">Уақыты: 13:00</p>
@@ -68,6 +96,7 @@ export function InvitationPageClient() {
 			</section>
 
 			<section className="relative overflow-hidden px-6 py-24 md:py-28">
+				<PetalBackground />
 				<motion.div className="relative z-10 mx-auto max-w-4xl text-center" {...fadeIn}>
 					<SectionTitle title="Мекен-жайы" />
 					<div className="linen-surface luxury-card space-y-6 p-6 sm:p-7 md:p-10">
@@ -107,6 +136,7 @@ export function InvitationPageClient() {
 			</section>
 
 			<section className="relative overflow-hidden bg-linear-to-b from-background via-[#f4ece2] to-secondary px-6 py-24 md:py-28">
+				<PetalBackground />
 				<motion.div className="relative z-10 mx-auto max-w-4xl text-center" {...fadeIn}>
 					<SectionTitle title="Тойға дейін" />
 					<Countdown />
@@ -114,6 +144,7 @@ export function InvitationPageClient() {
 			</section>
 
 			<section className="relative overflow-hidden px-6 py-24 md:py-28">
+				<PetalBackground />
 				<motion.div className="relative z-10 mx-auto max-w-2xl text-center" {...fadeIn}>
 					<Ornament />
 					<p className="mb-4 text-lg opacity-60 md:text-xl">Той иелері</p>
@@ -123,11 +154,13 @@ export function InvitationPageClient() {
 					>
 						Ата-анасы Ерболды — Жанылсын және ағалары
 					</p>
+					<p className="mt-4 text-xl opacity-80 md:text-2xl">Ұзату: Аяулым — Қарақат</p>
 					<Ornament />
 				</motion.div>
 			</section>
 
 			<section className="relative overflow-hidden bg-linear-to-b from-background to-secondary px-6 py-24 md:py-28">
+				<PetalBackground />
 				<motion.div className="relative z-10 mx-auto max-w-2xl" {...fadeIn}>
 					<SectionTitle title="Қатысуыңызды растаңыз" />
 					<p className="mb-12 text-center text-lg opacity-70">Қатысатыныңызды растаңыз</p>
@@ -141,7 +174,7 @@ export function InvitationPageClient() {
 function SectionTitle({ title }: { title: string }) {
 	return (
 		<h2
-			className="mb-10 text-4xl md:text-5xl text-center"
+			className="mb-10 text-4xl md:text-5xl"
 			style={{ fontFamily: 'var(--font-serif)', fontWeight: 600 }}
 		>
 			{title}
