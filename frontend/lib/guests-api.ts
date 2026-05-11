@@ -8,18 +8,8 @@ export type CreateGuestPayload = {
 	partnerFullName?: string
 }
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
-
-function getGuestsApiUrl(): string {
-	if (!apiBaseUrl?.trim()) {
-		throw new Error('NEXT_PUBLIC_API_BASE_URL is not configured.')
-	}
-
-	return `${apiBaseUrl.replace(/\/$/, '')}/api/guests`
-}
-
 export async function createGuestFromInvitation(payload: CreateGuestPayload): Promise<void> {
-	const response = await fetch(getGuestsApiUrl(), {
+	const response = await fetch('/api/guests', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',

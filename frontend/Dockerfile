@@ -16,8 +16,8 @@ COPY --from=deps /app/backend/package.json ./backend/package.json
 COPY --from=deps /app/frontend/package.json ./frontend/package.json
 COPY frontend ./frontend
 WORKDIR /app/frontend
-ARG NEXT_PUBLIC_API_BASE_URL
-ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+ARG BACKEND_INTERNAL_URL=http://backend:3000
+ENV BACKEND_INTERNAL_URL=$BACKEND_INTERNAL_URL
 RUN yarn build
 
 FROM node:22-alpine AS runner
@@ -31,6 +31,8 @@ WORKDIR /app/frontend
 COPY --from=build /app/frontend/.next ./.next
 COPY --from=build /app/frontend/public ./public
 COPY --from=build /app/frontend/next.config.js ./next.config.js
+ARG BACKEND_INTERNAL_URL=http://backend:3000
+ENV BACKEND_INTERNAL_URL=$BACKEND_INTERNAL_URL
 ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000
