@@ -16,10 +16,19 @@ import {
 } from 'recharts'
 import { apiJson, buildQuery } from '@/lib/crm/api'
 import { useCrmEvent } from '@/lib/crm/event-context'
-import type { GuestStats, StatusTimelineResponse, TableEntity, TagEntity } from '@/lib/crm/types'
+import type {
+	GuestStats,
+	GuestStatus,
+	StatusTimelineResponse,
+	TableEntity,
+	TagEntity,
+} from '@/lib/crm/types'
+import { guestStatusLabel } from '@/lib/crm/guest-ui'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-const COLORS = ['#22c55e', '#eab308', '#ef4444']
+const SEATING_PIE_COLORS = ['#22c55e', '#eab308']
+const STATUS_PIE_COLORS = ['#22c55e', '#3b82f6', '#ef4444']
+const statusesForPie: GuestStatus[] = ['ATTENDING', 'ATTENDING_WITH_SPOUSE', 'DECLINED']
 
 export function ReportsPageClient() {
 	const { effectiveEventType, me } = useCrmEvent()
@@ -64,12 +73,24 @@ export function ReportsPageClient() {
 	})
 
 	const s = statsSelf.data
-	const pieData = s
-		? [
-				{ name: 'Подтвердили', value: s.attending + s.attendingWithSpouse },
-				{ name: 'Ожидают', value: s.pending },
-				{ name: 'Отказались', value: s.declined },
-			]
+	const seatedConfirmedSeats = s ? Math.max(0, s.totalAttendees - s.unassignedConfirmedSeats) : 0
+	const seatingPieData =
+		s && s.totalAttendees > 0
+			? [
+					{ name: 'Со столом (мест)', value: seatedConfirmedSeats },
+					{ name: 'Без стола (мест)', value: s.unassignedConfirmedSeats },
+				]
+			: []
+	const statusPieData = s
+		? statusesForPie.map((st) => ({
+				name: guestStatusLabel(st),
+				value:
+					st === 'ATTENDING'
+						? s.attending
+						: st === 'ATTENDING_WITH_SPOUSE'
+							? s.attendingWithSpouse
+							: s.declined,
+			}))
 		: []
 
 	const tagPie =
@@ -92,32 +113,83 @@ export function ReportsPageClient() {
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-				<MiniStat label="Всего гостей" value={s?.total} />
-				<MiniStat label="Подтвердили" value={s ? s.attending + s.attendingWithSpouse : undefined} />
+				<MiniStat
+					label="Ожидается гостей"
+					value={s?.totalAttendees}
+					hint={s ? `Записей в списке: ${s.total}` : undefined}
+				/>
+				<MiniStat
+					label="Ответ «да» (пригл.)"
+					value={s ? s.attending + s.attendingWithSpouse : undefined}
+					hint={s ? `${s.totalAttendees} чел.` : undefined}
+				/>
 				<MiniStat label="С парой" value={s?.attendingWithSpouse} />
-				<MiniStat label="Ожидают" value={s?.pending} />
+				<MiniStat
+					label="Без стола (мест)"
+					value={s?.unassignedConfirmedSeats}
+					hint={s ? `Записей без стола: ${s.unassigned}` : undefined}
+				/>
 				<MiniStat label="Отказались" value={s?.declined} />
 				<MiniStat label="Дубликаты" value={s?.duplicates} />
 			</div>
 
-			<div className="grid gap-6 lg:grid-cols-2">
+			<div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
 				<Card>
 					<CardHeader>
-						<CardTitle className="font-serif text-lg">Статусы гостей</CardTitle>
+						<CardTitle className="font-serif text-lg">Рассажка</CardTitle>
+						<p className="text-xs text-muted-foreground">
+							Ожидаемые гости (места): подтвердившие с ответом «да»; сумма сегментов = ожидаемое
+							число гостей.
+						</p>
+					</CardHeader>
+					<CardContent className="h-72">
+						{seatingPieData.length === 0 ? (
+							<p className="flex h-full items-center justify-center text-sm text-muted-foreground">
+								Нет подтверждённых гостей для рассадки
+							</p>
+						) : (
+							<ResponsiveContainer width="100%" height="100%">
+								<PieChart>
+									<Pie
+										data={seatingPieData}
+										dataKey="value"
+										nameKey="name"
+										innerRadius={50}
+										outerRadius={80}
+										paddingAngle={2}
+									>
+										{seatingPieData.map((_, i) => (
+											<Cell key={i} fill={SEATING_PIE_COLORS[i % SEATING_PIE_COLORS.length]} />
+										))}
+									</Pie>
+									<Tooltip />
+									<Legend />
+								</PieChart>
+							</ResponsiveContainer>
+						)}
+					</CardContent>
+				</Card>
+
+				<Card>
+					<CardHeader>
+						<CardTitle className="font-serif text-lg">Ответы в списке</CardTitle>
+						<p className="text-xs text-muted-foreground">
+							Записи в CRM по статусу (всего {s?.total ?? '—'}).
+						</p>
 					</CardHeader>
 					<CardContent className="h-72">
 						<ResponsiveContainer width="100%" height="100%">
 							<PieChart>
 								<Pie
-									data={pieData}
+									data={statusPieData}
 									dataKey="value"
 									nameKey="name"
 									innerRadius={50}
 									outerRadius={80}
 									paddingAngle={2}
 								>
-									{pieData.map((_, i) => (
-										<Cell key={i} fill={COLORS[i % COLORS.length]} />
+									{statusPieData.map((_, i) => (
+										<Cell key={i} fill={STATUS_PIE_COLORS[i % STATUS_PIE_COLORS.length]} />
 									))}
 								</Pie>
 								<Tooltip />
@@ -127,7 +199,7 @@ export function ReportsPageClient() {
 					</CardContent>
 				</Card>
 
-				<Card>
+				<Card className="lg:col-span-2 xl:col-span-1">
 					<CardHeader>
 						<CardTitle className="font-serif text-lg">Подтверждения по дням</CardTitle>
 					</CardHeader>
@@ -203,10 +275,12 @@ export function ReportsPageClient() {
 							<thead>
 								<tr className="border-b border-border text-left text-muted-foreground">
 									<th className="p-2">Событие</th>
-									<th className="p-2">Всего</th>
-									<th className="p-2">Подтвердили</th>
+									<th className="p-2">Записей</th>
+									<th className="p-2">Ожид. чел.</th>
+									<th className="p-2">Да (пригл.)</th>
 									<th className="p-2">С парой</th>
-									<th className="p-2">Ожидают</th>
+									<th className="p-2">Без стола (мест)</th>
+									<th className="p-2">Зап. без стола</th>
 									<th className="p-2">Отказ</th>
 									<th className="p-2">Дубликаты</th>
 								</tr>
@@ -214,14 +288,16 @@ export function ReportsPageClient() {
 							<tbody>
 								{[
 									{ label: 'Қыз ұзату', s: statsBride.data },
-									{ label: 'Свадьба', s: statsWedding.data },
+									{ label: 'Той', s: statsWedding.data },
 								].map((row) => (
 									<tr key={row.label} className="border-b border-border">
 										<td className="p-2 font-medium">{row.label}</td>
 										<td className="p-2">{row.s.total}</td>
+										<td className="p-2">{row.s.totalAttendees}</td>
 										<td className="p-2">{row.s.attending + row.s.attendingWithSpouse}</td>
 										<td className="p-2">{row.s.attendingWithSpouse}</td>
-										<td className="p-2">{row.s.pending}</td>
+										<td className="p-2">{row.s.unassignedConfirmedSeats}</td>
+										<td className="p-2">{row.s.unassigned}</td>
 										<td className="p-2">{row.s.declined}</td>
 										<td className="p-2">{row.s.duplicates}</td>
 									</tr>
@@ -235,12 +311,13 @@ export function ReportsPageClient() {
 	)
 }
 
-function MiniStat({ label, value }: { label: string; value?: number }) {
+function MiniStat({ label, value, hint }: { label: string; value?: number; hint?: string }) {
 	return (
 		<Card>
 			<CardContent className="p-4">
 				<p className="text-xs text-muted-foreground">{label}</p>
 				<p className="text-2xl font-semibold">{value ?? '—'}</p>
+				{hint ? <p className="mt-1 text-xs text-muted-foreground">{hint}</p> : null}
 			</CardContent>
 		</Card>
 	)

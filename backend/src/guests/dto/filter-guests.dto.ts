@@ -1,4 +1,12 @@
-import { IsOptional, IsEnum, IsArray, IsUUID, IsBoolean } from 'class-validator'
+import {
+	IsOptional,
+	IsEnum,
+	IsArray,
+	IsUUID,
+	IsBoolean,
+	IsString,
+	MaxLength,
+} from 'class-validator'
 import { Transform } from 'class-transformer'
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { EventType, GuestStatus } from '@prisma/client'
@@ -50,7 +58,22 @@ export class FilterGuestsDto extends PaginationDto {
 	@IsBoolean()
 	unassigned?: boolean
 
-	@ApiPropertyOptional({ description: 'Search by guest name' })
+	@ApiPropertyOptional({
+		description:
+			'With unassigned=true, only guests with status ATTENDING or ATTENDING_WITH_SPOUSE (seating picklist)',
+	})
 	@IsOptional()
+	@Transform(({ value }): boolean | undefined => {
+		if (value === true || value === 'true' || value === '1' || value === 1) return true
+		if (value === false || value === 'false' || value === '0' || value === 0) return false
+		return undefined
+	})
+	@IsBoolean()
+	seatingPicklist?: boolean
+
+	@ApiPropertyOptional({ description: 'Search by guest or partner name' })
+	@IsOptional()
+	@IsString()
+	@MaxLength(200)
 	search?: string
 }

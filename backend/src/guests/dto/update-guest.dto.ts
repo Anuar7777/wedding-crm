@@ -24,7 +24,11 @@ export class UpdateGuestDto {
 	@IsUUID('4', { each: true })
 	tagIds?: string[]
 
-	@ApiPropertyOptional({ description: 'Manually override duplicate flag' })
+	@ApiPropertyOptional({
+		nullable: true,
+		description: 'Table UUID, or null to remove from table',
+	})
 	@IsOptional()
-	isDuplicate?: boolean
+	@IsUUID('4')
+	tableId?: string | null
 }

@@ -27,7 +27,7 @@ const badScript = Bad_Script({
 })
 
 export const metadata: Metadata = {
-	title: 'Wedding CRM Frontend',
+	title: 'Event CRM Frontend',
 	description: 'Invitation and CRM frontend.',
 }
 

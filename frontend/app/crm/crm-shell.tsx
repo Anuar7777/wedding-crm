@@ -27,6 +27,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useClientMounted } from '@/lib/use-client-mounted'
 import type { LucideIcon } from 'lucide-react'
 
@@ -45,9 +46,9 @@ function EventSwitcher() {
 	const { effectiveEventType, setSelectedEventType, canSwitchEvent } = useCrmEvent()
 	const tabs: { id: EventType; label: string }[] = [
 		{ id: 'BRIDE_FAREWELL', label: 'Қыз ұзату' },
-		{ id: 'WEDDING', label: 'Свадьба' },
+		{ id: 'WEDDING', label: 'Той' },
 	]
-	const currentLabel = effectiveEventType === 'WEDDING' ? 'Свадьба' : 'Қыз ұзату'
+	const currentLabel = effectiveEventType === 'WEDDING' ? 'Той' : 'Қыз ұзату'
 
 	if (!canSwitchEvent) {
 		return (
@@ -78,9 +79,74 @@ function EventSwitcher() {
 	)
 }
 
+function CrmSidebarContent({
+	pathname,
+	navItems,
+	me,
+	effectiveEventType,
+}: {
+	pathname: string
+	navItems: NavItem[]
+	me: MeResponse | null
+	effectiveEventType: EventType
+}) {
+	return (
+		<>
+			<Link href="/crm/home" className="mb-8 flex items-center gap-2 px-2">
+				<div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-primary">
+					<Sparkles className="h-5 w-5" />
+				</div>
+				<div>
+					<p className="font-serif text-lg font-semibold leading-tight">Event CRM</p>
+					<p className="text-xs text-muted-foreground">Қыз ұзату • Той</p>
+				</div>
+			</Link>
+			<nav className="flex flex-1 flex-col gap-1">
+				{navItems.map((item) => {
+					const Icon = item.icon
+					const hilite = pathname === item.href
+					return (
+						<Link
+							key={`${item.href}-${item.label}`}
+							href={item.href}
+							className={cn(
+								'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+								hilite ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'
+							)}
+						>
+							<Icon className="h-4 w-4 shrink-0" />
+							{item.label}
+						</Link>
+					)
+				})}
+				<Separator className="my-2" />
+				<Link
+					href="/crm/settings"
+					className={cn(
+						'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+						pathname === '/crm/settings' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+					)}
+				>
+					<Settings className="h-4 w-4" />
+					Настройки
+				</Link>
+			</nav>
+			<div className="mt-auto rounded-lg border border-border bg-background/80 p-3 text-xs">
+				<p className="font-medium">{me?.role === 'SUPERADMIN' ? 'Суперадмин' : 'Администратор'}</p>
+				<p className="truncate text-muted-foreground">{me?.email}</p>
+				<p className="mt-1 text-muted-foreground">
+					Событие: {effectiveEventType === 'WEDDING' ? 'Той' : 'Қыз ұзату'}
+				</p>
+			</div>
+		</>
+	)
+}
+
 function CrmInner({ children }: { children: React.ReactNode }) {
 	const pathname = usePathname()
 	const { me, effectiveEventType } = useCrmEvent()
+	const [navOpen, setNavOpen] = React.useState(false)
+	const mobileNavId = React.useId()
 
 	const navItems = React.useMemo(() => {
 		const items = [...baseNav]
@@ -90,75 +156,66 @@ function CrmInner({ children }: { children: React.ReactNode }) {
 		return items
 	}, [me?.role])
 
+	React.useEffect(() => {
+		const id = requestAnimationFrame(() => setNavOpen(false))
+		return () => cancelAnimationFrame(id)
+	}, [pathname])
+
 	return (
 		<div className="flex min-h-screen">
 			<aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-card/90 p-4 backdrop-blur md:flex">
-				<Link href="/crm/home" className="mb-8 flex items-center gap-2 px-2">
-					<div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-primary">
-						<Sparkles className="h-5 w-5" />
-					</div>
-					<div>
-						<p className="font-serif text-lg font-semibold leading-tight">Wedding CRM</p>
-						<p className="text-xs text-muted-foreground">Қыз ұзату • Той</p>
-					</div>
-				</Link>
-				<nav className="flex flex-1 flex-col gap-1">
-					{navItems.map((item) => {
-						const Icon = item.icon
-						const hilite = pathname === item.href
-						return (
-							<Link
-								key={`${item.href}-${item.label}`}
-								href={item.href}
-								className={cn(
-									'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-									hilite ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'
-								)}
-							>
-								<Icon className="h-4 w-4 shrink-0" />
-								{item.label}
-							</Link>
-						)
-					})}
-					<Separator className="my-2" />
-					<Link
-						href="/crm/settings"
-						className={cn(
-							'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-							pathname === '/crm/settings' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
-						)}
-					>
-						<Settings className="h-4 w-4" />
-						Настройки
-					</Link>
-				</nav>
-				<div className="mt-auto rounded-lg border border-border bg-background/80 p-3 text-xs">
-					<p className="font-medium">
-						{me?.role === 'SUPERADMIN' ? 'Суперадмин' : 'Администратор'}
-					</p>
-					<p className="truncate text-muted-foreground">{me?.email}</p>
-					<p className="mt-1 text-muted-foreground">
-						Событие: {effectiveEventType === 'WEDDING' ? 'Свадьба' : 'Қыз ұзату'}
-					</p>
-				</div>
+				<CrmSidebarContent
+					pathname={pathname}
+					navItems={navItems}
+					me={me}
+					effectiveEventType={effectiveEventType}
+				/>
 			</aside>
+
+			<Sheet open={navOpen} onOpenChange={setNavOpen}>
+				<SheetContent
+					side="left"
+					className="flex w-full flex-col overflow-y-auto sm:max-w-sm"
+					id={mobileNavId}
+				>
+					<SheetHeader className="text-left">
+						<SheetTitle>Меню</SheetTitle>
+					</SheetHeader>
+					<div className="flex min-h-0 flex-1 flex-col pt-2">
+						<CrmSidebarContent
+							pathname={pathname}
+							navItems={navItems}
+							me={me}
+							effectiveEventType={effectiveEventType}
+						/>
+					</div>
+				</SheetContent>
+			</Sheet>
 
 			<div className="flex min-h-screen flex-1 flex-col">
 				<header className="sticky top-0 z-40 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-background/85 px-4 py-3 backdrop-blur md:px-6">
-					<div className="flex items-center gap-3">
+					<div className="flex min-w-0 flex-1 items-center gap-3 md:min-w-0 md:flex-initial">
 						<Button
 							variant="outline"
 							size="icon"
-							className="md:hidden"
+							className="shrink-0 md:hidden"
 							type="button"
-							aria-label="Меню"
+							aria-label="Открыть меню"
+							aria-expanded={navOpen}
+							aria-controls={mobileNavId}
+							onClick={() => setNavOpen(true)}
 						>
 							<Menu className="h-4 w-4" />
 						</Button>
-						<EventSwitcher />
+						<div className="min-w-0 flex-1 md:flex-initial">
+							<EventSwitcher />
+						</div>
 					</div>
-					<Button asChild>
-						<Link href="/crm/guests?create=1">+ Добавить гостя</Link>
+					<Button asChild className="shrink-0">
+						<Link href="/crm/guests?create=1">
+							<span className="sm:hidden">+</span>
+							<span className="hidden sm:inline">+ Добавить гостя</span>
+						</Link>
 					</Button>
 				</header>
 				<main className="flex-1 p-4 md:p-6">{children}</main>
@@ -192,6 +249,14 @@ function CrmAuthedLayout({ children }: { children: React.ReactNode }) {
 			router.replace('/crm/login')
 		}
 	}, [ready, authed, meQuery.isError, router])
+
+	React.useEffect(() => {
+		if (!ready || !authed) return
+		document.documentElement.dataset.crmTheme = theme
+		return () => {
+			delete document.documentElement.dataset.crmTheme
+		}
+	}, [ready, authed, theme])
 
 	if (!ready || !authed || meQuery.isLoading || !meQuery.data) {
 		return (

@@ -15,6 +15,7 @@ const Countdown = dynamic(
 )
 
 import birdsImage from '@/public/invitation/birds.webp'
+import { DressCodeSection } from '@/app/components/invitation/dress-code-section'
 
 export function InvitationPageClient() {
 	const fadeIn = {
@@ -112,6 +113,8 @@ export function InvitationPageClient() {
 					</div>
 				</motion.div>
 			</section>
+
+			<DressCodeSection fadeIn={fadeIn} />
 
 			<section className="relative overflow-hidden from-background via-[#f4ece2] to-secondary px-6 py-24 md:py-28">
 				<motion.div className="relative z-10 mx-auto max-w-4xl text-center" {...fadeIn}>

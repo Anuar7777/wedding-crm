@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
-import { CheckCircle2, Hourglass, UserX, Users2 } from 'lucide-react'
+import { Armchair, CheckCircle2, UserX, Users2 } from 'lucide-react'
 import { apiJson, buildQuery } from '@/lib/crm/api'
 import { useCrmEvent } from '@/lib/crm/event-context'
 import type { GuestEntity, GuestStats, PaginatedGuests } from '@/lib/crm/types'
@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { guestStatusBadgeVariant, guestStatusLabel } from '@/lib/crm/guest-ui'
+import { useMediaMinMd } from '@/lib/use-media-min-md'
 
 function StatCard({
 	title,
@@ -47,6 +48,8 @@ function StatCard({
 
 export function HomePageClient() {
 	const { effectiveEventType } = useCrmEvent()
+	const isMd = useMediaMinMd()
+	const previewLimit = isMd ? 10 : 5
 
 	const statsQuery = useQuery({
 		queryKey: ['crm', 'stats', effectiveEventType],
@@ -55,10 +58,10 @@ export function HomePageClient() {
 	})
 
 	const guestsQuery = useQuery({
-		queryKey: ['crm', 'guests-preview', effectiveEventType],
+		queryKey: ['crm', 'guests-preview', effectiveEventType, previewLimit],
 		queryFn: () =>
 			apiJson<PaginatedGuests>(
-				`/api/guests${buildQuery({ type: effectiveEventType, page: 1, limit: 10 })}`
+				`/api/guests${buildQuery({ type: effectiveEventType, page: 1, limit: previewLimit })}`
 			),
 	})
 
@@ -72,19 +75,29 @@ export function HomePageClient() {
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-				<StatCard title="Всего гостей" value={s?.total ?? '—'} hint="В списке" icon={Users2} />
+				<StatCard
+					title="Ожидается гостей"
+					value={s?.totalAttendees ?? '—'}
+					hint={s ? `Записей в списке: ${s.total}` : undefined}
+					icon={Users2}
+				/>
 				<StatCard
 					title="Подтвердили"
 					value={s ? s.attending + s.attendingWithSpouse : '—'}
 					hint={
 						s && s.total
-							? `${Math.round(((s.attending + s.attendingWithSpouse) / s.total) * 100)}% от списка`
+							? `${s.totalAttendees} чел. · ${Math.round(((s.attending + s.attendingWithSpouse) / s.total) * 100)}% от списка (приглаш.)`
 							: undefined
 					}
 					icon={CheckCircle2}
 				/>
 				<StatCard title="С парой" value={s?.attendingWithSpouse ?? '—'} icon={Users2} />
-				<StatCard title="Ожидают" value={s?.pending ?? '—'} icon={Hourglass} />
+				<StatCard
+					title="Без стола (мест)"
+					value={s?.unassignedConfirmedSeats ?? '—'}
+					hint={s ? `Записей без стола: ${s.unassigned}` : undefined}
+					icon={Armchair}
+				/>
 				<StatCard title="Отказались" value={s?.declined ?? '—'} icon={UserX} />
 			</div>
 
@@ -108,7 +121,9 @@ export function HomePageClient() {
 						<TableBody>
 							{(guestsQuery.data?.data ?? []).map((g: GuestEntity) => (
 								<TableRow key={g.id}>
-									<TableCell className="font-medium">{g.fullName}</TableCell>
+									<TableCell className="max-w-[14rem] min-w-0 whitespace-normal break-words font-medium">
+										{g.fullName}
+									</TableCell>
 									<TableCell>
 										<Badge variant={guestStatusBadgeVariant(g.status)}>
 											{guestStatusLabel(g.status)}

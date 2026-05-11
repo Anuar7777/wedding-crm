@@ -1,4 +1,4 @@
-# Wedding CRM
+# Event CRM
 
 Monorepo: NestJS API (`backend/`), Next.js frontend (`frontend/`), PostgreSQL via Docker Compose.
 

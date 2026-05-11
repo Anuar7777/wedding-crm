@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus, MoreHorizontal, Trash2, Users, UserMinus } from 'lucide-react'
 import { apiJson, buildQuery } from '@/lib/crm/api'
 import { useCrmEvent } from '@/lib/crm/event-context'
-import type { GuestEntity, PaginatedGuests, TableEntity } from '@/lib/crm/types'
+import type { GuestEntity, GuestStatus, PaginatedGuests, TableEntity } from '@/lib/crm/types'
 import { toast } from '@/lib/crm/toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -26,9 +26,49 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 type TableFilter = 'all' | 'empty' | 'partial' | 'full'
+
+function SeatingGuestBlock({
+	fullName,
+	status,
+	partnerFullName,
+	compact,
+}: {
+	fullName: string
+	status: GuestStatus
+	partnerFullName: string | null | undefined
+	compact?: boolean
+}) {
+	const isPair = status === 'ATTENDING_WITH_SPOUSE'
+	const partner = partnerFullName?.trim()
+	return (
+		<div className="flex min-w-0 flex-col gap-0.5">
+			<span className={cn('wrap-break-word', compact ? 'text-xs' : 'text-sm', 'font-medium')}>
+				{fullName}
+			</span>
+			{isPair && partner ? (
+				<span
+					className={cn(
+						'wrap-break-word text-muted-foreground',
+						compact ? 'text-[11px] leading-snug' : 'text-xs'
+					)}
+				>
+					Пара: {partner}
+				</span>
+			) : isPair && !partner ? (
+				<span className="text-xs text-muted-foreground">Пара (+1), имя не указано</span>
+			) : null}
+			{isPair ? (
+				<Badge variant="secondary" className="w-fit text-[10px] font-normal">
+					2 места
+				</Badge>
+			) : null}
+		</div>
+	)
+}
 
 export function TablesPageClient() {
 	const { effectiveEventType } = useCrmEvent()
@@ -60,6 +100,7 @@ export function TablesPageClient() {
 			'crm',
 			'guests',
 			'unassigned',
+			'seating',
 			effectiveEventType,
 			pickSearchDebounced,
 			seatingTableId,
@@ -69,6 +110,7 @@ export function TablesPageClient() {
 				`/api/guests${buildQuery({
 					type: effectiveEventType,
 					unassigned: true,
+					seatingPicklist: true,
 					search: pickSearchDebounced || undefined,
 					page: 1,
 					limit: 40,
@@ -248,15 +290,20 @@ export function TablesPageClient() {
 								{t.guests.length === 0 ? (
 									<p className="text-sm text-muted-foreground">Стол свободен</p>
 								) : (
-									<div className="flex flex-wrap gap-1">
-										{t.guests.slice(0, 6).map((g) => (
-											<span key={g.id} className="rounded-full bg-secondary px-2 py-0.5 text-xs">
-												{g.fullName.split(' ')[0]}
-											</span>
+									<div className="flex flex-col gap-1.5">
+										{t.guests.map((g) => (
+											<div
+												key={g.id}
+												className="rounded-lg bg-secondary px-2 py-1.5 text-foreground"
+											>
+												<SeatingGuestBlock
+													fullName={g.fullName}
+													status={g.status}
+													partnerFullName={g.partnerFullName}
+													compact
+												/>
+											</div>
 										))}
-										{t.guests.length > 6 ? (
-											<span className="text-xs text-muted-foreground">+{t.guests.length - 6}</span>
-										) : null}
 									</div>
 								)}
 							</CardContent>
@@ -328,8 +375,14 @@ export function TablesPageClient() {
 								) : (
 									<ul className="max-h-40 space-y-2 overflow-y-auto rounded-lg border border-border p-2">
 										{seatingTable.guests.map((g) => (
-											<li key={g.id} className="flex items-center justify-between gap-2 text-sm">
-												<span className="min-w-0 truncate">{g.fullName}</span>
+											<li key={g.id} className="flex items-start justify-between gap-2 text-sm">
+												<div className="min-w-0 flex-1 pr-1">
+													<SeatingGuestBlock
+														fullName={g.fullName}
+														status={g.status}
+														partnerFullName={g.partnerFullName}
+													/>
+												</div>
 												<Button
 													type="button"
 													variant="ghost"
@@ -358,7 +411,7 @@ export function TablesPageClient() {
 								<Label htmlFor="seating-pick-search">Добавить гостя (без стола)</Label>
 								<Input
 									id="seating-pick-search"
-									placeholder="Поиск по имени…"
+									placeholder="Поиск по имени гостя или партнёра…"
 									value={pickSearch}
 									onChange={(e) => setPickSearch(e.target.value)}
 								/>
@@ -382,8 +435,12 @@ export function TablesPageClient() {
 															})
 														}
 													>
-														<span className="min-w-0 truncate font-medium">{g.fullName}</span>
-														<span className="shrink-0 text-xs text-muted-foreground">
+														<SeatingGuestBlock
+															fullName={g.fullName}
+															status={g.status}
+															partnerFullName={g.partnerFullName}
+														/>
+														<span className="shrink-0 self-center text-xs text-muted-foreground">
 															Назначить
 														</span>
 													</button>

@@ -45,6 +45,10 @@ async function bootstrap() {
 	)
 
 	const configService = app.get(ConfigService)
+	if (configService.get<string>('TRUST_PROXY') === 'true') {
+		const http = app.getHttpAdapter().getInstance() as { set?: (k: string, v: unknown) => void }
+		http.set?.('trust proxy', 1)
+	}
 	app.useGlobalInterceptors(new HttpLoggingInterceptor(configService))
 	app.useGlobalFilters(new AllExceptionsFilter(configService))
 

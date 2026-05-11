@@ -1,7 +1,6 @@
 import type { GuestStatus } from '@/lib/crm/types'
 
 const labels: Record<GuestStatus, string> = {
-	PENDING: 'Ожидает',
 	ATTENDING: 'Подтвердил',
 	ATTENDING_WITH_SPOUSE: 'С парой',
 	DECLINED: 'Отказался',
@@ -18,8 +17,6 @@ export function guestStatusBadgeVariant(
 		case 'ATTENDING':
 		case 'ATTENDING_WITH_SPOUSE':
 			return 'success'
-		case 'PENDING':
-			return 'warning'
 		case 'DECLINED':
 			return 'destructive'
 		default:

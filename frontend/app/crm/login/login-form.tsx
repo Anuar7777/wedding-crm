@@ -58,7 +58,7 @@ export function CrmLoginForm() {
 		<div className="flex min-h-screen items-center justify-center p-4">
 			<Card className="w-full max-w-md">
 				<CardHeader>
-					<CardTitle className="font-serif text-2xl">Wedding CRM</CardTitle>
+					<CardTitle className="font-serif text-2xl">Event CRM</CardTitle>
 					<CardDescription>Войдите, чтобы управлять гостями и приглашениями</CardDescription>
 				</CardHeader>
 				<CardContent>

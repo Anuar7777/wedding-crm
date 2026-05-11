@@ -2,6 +2,17 @@ import * as Joi from 'joi'
 
 export const envValidationSchema = Joi.object({
 	DATABASE_URL: Joi.string().uri().required(),
+	PG_POOL_MAX: Joi.any()
+		.optional()
+		.custom((v, helpers) => {
+			if (v === undefined || v === null || v === '') return undefined
+			const n = Number(v)
+			if (!Number.isInteger(n) || n < 1 || n > 200) {
+				return helpers.error('any.invalid')
+			}
+			return n
+		}, 'PG_POOL_MAX'),
+	TRUST_PROXY: Joi.string().valid('true', 'false', '').default('false'),
 	JWT_ACCESS_SECRET: Joi.string().min(8).required(),
 	JWT_REFRESH_SECRET: Joi.string().min(8).required(),
 	JWT_ACCESS_EXPIRATION: Joi.string().default('15m'),

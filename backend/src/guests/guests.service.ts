@@ -12,10 +12,23 @@ import { FilterGuestsDto } from './dto/filter-guests.dto'
 import { StatusTimelineQueryDto } from './dto/status-timeline-query.dto'
 import { BulkDeleteGuestsDto } from './dto/bulk-delete-guests.dto'
 import { BulkTagsGuestsDto } from './dto/bulk-tags-guests.dto'
+import { DUPLICATE_GUEST_TAG_NAME } from './guests.constants'
+import { namesSimilar, normalizePersonName } from './duplicate-name.util'
+import { TablesService } from '../tables/tables.service'
+
+type GuestForDupScan = {
+	id: string
+	fullName: string
+	partnerFullName: string | null
+	tags: { id: string; name: string }[]
+}
 
 @Injectable()
 export class GuestsService {
-	constructor(private prisma: PrismaService) {}
+	constructor(
+		private prisma: PrismaService,
+		private tablesService: TablesService
+	) {}
 
 	private buildTypeWhere(userScope: EventType | null, type?: EventType): Prisma.GuestWhereInput {
 		const where: Prisma.GuestWhereInput = {}
@@ -27,34 +40,70 @@ export class GuestsService {
 		return where
 	}
 
+	private tokensForGuest(g: Pick<GuestForDupScan, 'fullName' | 'partnerFullName'>): string[] {
+		const a = normalizePersonName(g.fullName)
+		const b = normalizePersonName(g.partnerFullName)
+		const out: string[] = []
+		if (a) out.push(a)
+		if (b) out.push(b)
+		return out
+	}
+
+	private guestsAreDuplicatePair(a: GuestForDupScan, b: GuestForDupScan): boolean {
+		const ta = this.tokensForGuest(a)
+		const tb = this.tokensForGuest(b)
+		for (const x of ta) {
+			for (const y of tb) {
+				if (namesSimilar(x, y)) return true
+			}
+		}
+		return false
+	}
+
 	async create(dto: CreateGuestDto, userScope: EventType | null) {
 		if (userScope && dto.type !== userScope) {
 			throw new ForbiddenException('You can only create guests for your event scope')
 		}
-		const status = dto.status ?? GuestStatus.PENDING
+		const status = dto.status ?? GuestStatus.ATTENDING
 		if (status === GuestStatus.ATTENDING_WITH_SPOUSE && !dto.partnerFullName?.trim()) {
 			throw new BadRequestException('Partner full name is required when attending with spouse')
 		}
 
-		return this.prisma.$transaction(async (tx) => {
-			const guest = await tx.guest.create({
-				data: {
-					fullName: dto.fullName.trim(),
-					type: dto.type,
-					status,
-					partnerFullName:
-						status === GuestStatus.ATTENDING_WITH_SPOUSE ? dto.partnerFullName?.trim() : undefined,
-					tags: dto.tagIds?.length ? { connect: dto.tagIds.map((id) => ({ id })) } : undefined,
+		if (dto.tagIds?.length) {
+			const tags = await this.prisma.tag.findMany({
+				where: { id: { in: dto.tagIds } },
+				select: { id: true, type: true },
+			})
+			if (tags.length !== dto.tagIds.length) {
+				throw new NotFoundException('One or more tags were not found')
+			}
+			for (const t of tags) {
+				if (t.type !== dto.type) {
+					throw new BadRequestException('All tags must belong to the same event type as the guest')
+				}
+			}
+		}
+
+		const created = await this.prisma.guest.create({
+			data: {
+				fullName: dto.fullName.trim(),
+				type: dto.type,
+				status,
+				partnerFullName:
+					status === GuestStatus.ATTENDING_WITH_SPOUSE ? dto.partnerFullName?.trim() : undefined,
+				tags: dto.tagIds?.length ? { connect: dto.tagIds.map((id) => ({ id })) } : undefined,
+				statusEvents: {
+					create: [{ status }],
 				},
-				include: { tags: true, table: true },
-			})
-
-			await tx.guestStatusEvent.create({
-				data: { guestId: guest.id, status: guest.status },
-			})
-
-			return guest
+			},
+			include: { tags: true, table: true },
 		})
+
+		if (dto.tableId) {
+			return this.tablesService.assignGuest(dto.tableId, created.id, userScope)
+		}
+
+		return created
 	}
 
 	async findAll(filters: FilterGuestsDto, userScope: EventType | null) {
@@ -70,8 +119,12 @@ export class GuestsService {
 			where.status = filters.status
 		}
 
-		if (filters.search) {
-			where.fullName = { contains: filters.search, mode: 'insensitive' }
+		if (filters.search?.trim()) {
+			const q = filters.search.trim()
+			where.OR = [
+				{ fullName: { contains: q, mode: 'insensitive' } },
+				{ partnerFullName: { contains: q, mode: 'insensitive' } },
+			]
 		}
 
 		if (filters.tagIds?.length) {
@@ -80,6 +133,9 @@ export class GuestsService {
 
 		if (filters.unassigned) {
 			where.tableId = null
+			if (filters.seatingPicklist) {
+				where.status = { in: [GuestStatus.ATTENDING, GuestStatus.ATTENDING_WITH_SPOUSE] }
+			}
 		} else if (filters.tableId) {
 			where.tableId = filters.tableId
 		}
@@ -138,10 +194,13 @@ export class GuestsService {
 		if (dto.fullName !== undefined) data.fullName = dto.fullName
 		if (dto.status !== undefined) data.status = dto.status
 		if (dto.partnerFullName !== undefined) data.partnerFullName = dto.partnerFullName
-		if (dto.isDuplicate !== undefined) data.isDuplicate = dto.isDuplicate
 
 		if (dto.tagIds !== undefined) {
 			data.tags = { set: dto.tagIds.map((tid) => ({ id: tid })) }
+		}
+
+		if (dto.tableId === null) {
+			data.table = { disconnect: true }
 		}
 
 		const statusChanged = dto.status !== undefined && dto.status !== guest.status
@@ -162,39 +221,82 @@ export class GuestsService {
 			return g
 		})
 
-		if (dto.fullName && dto.fullName !== guest.fullName) {
-			await this.detectDuplicates(updated.fullName, updated.type, updated.id)
+		if (dto.tableId !== undefined && dto.tableId !== null && dto.tableId !== guest.tableId) {
+			return this.tablesService.assignGuest(dto.tableId, id, userScope)
 		}
 
 		return updated
 	}
 
 	async remove(id: string, userScope: EventType | null) {
-		await this.findOne(id, userScope)
+		const guest = await this.prisma.guest.findUnique({
+			where: { id },
+			select: { id: true, type: true },
+		})
+		if (!guest) {
+			throw new NotFoundException('Guest not found')
+		}
+		if (userScope && guest.type !== userScope) {
+			throw new ForbiddenException('You do not have access to this guest')
+		}
 		await this.prisma.guest.delete({ where: { id } })
 		return { message: 'Guest deleted' }
 	}
 
 	async getStats(userScope: EventType | null, type?: EventType) {
 		const where = this.buildTypeWhere(userScope, type)
+		const effectiveType = userScope ?? type
+		const duplicateTagFilter: Prisma.TagWhereInput = { name: DUPLICATE_GUEST_TAG_NAME }
+		if (effectiveType) {
+			duplicateTagFilter.type = effectiveType
+		}
 
-		const [total, pending, attending, attendingWithSpouse, declined, duplicates] =
-			await Promise.all([
-				this.prisma.guest.count({ where }),
-				this.prisma.guest.count({ where: { ...where, status: 'PENDING' } }),
-				this.prisma.guest.count({ where: { ...where, status: 'ATTENDING' } }),
-				this.prisma.guest.count({
-					where: { ...where, status: 'ATTENDING_WITH_SPOUSE' },
-				}),
-				this.prisma.guest.count({ where: { ...where, status: 'DECLINED' } }),
-				this.prisma.guest.count({ where: { ...where, isDuplicate: true } }),
-			])
+		const duplicateGuestWhere: Prisma.GuestWhereInput = {
+			...where,
+			tags: { some: duplicateTagFilter },
+		}
+
+		const [
+			total,
+			unassigned,
+			attending,
+			attendingWithSpouse,
+			declined,
+			duplicates,
+			unassignedAttending,
+			unassignedWithSpouse,
+		] = await Promise.all([
+			this.prisma.guest.count({ where }),
+			this.prisma.guest.count({ where: { ...where, tableId: null } }),
+			this.prisma.guest.count({ where: { ...where, status: 'ATTENDING' } }),
+			this.prisma.guest.count({
+				where: { ...where, status: 'ATTENDING_WITH_SPOUSE' },
+			}),
+			this.prisma.guest.count({ where: { ...where, status: 'DECLINED' } }),
+			this.prisma.guest.count({ where: duplicateGuestWhere }),
+			this.prisma.guest.count({
+				where: {
+					...where,
+					tableId: null,
+					status: GuestStatus.ATTENDING,
+				},
+			}),
+			this.prisma.guest.count({
+				where: {
+					...where,
+					tableId: null,
+					status: GuestStatus.ATTENDING_WITH_SPOUSE,
+				},
+			}),
+		])
 
 		const totalAttendees = attending + attendingWithSpouse * 2
+		const unassignedConfirmedSeats = unassignedAttending + unassignedWithSpouse * 2
 
 		return {
 			total,
-			pending,
+			unassigned,
+			unassignedConfirmedSeats,
 			attending,
 			attendingWithSpouse,
 			declined,
@@ -218,19 +320,25 @@ export class GuestsService {
 			throw new BadRequestException('"from" must be before "to"')
 		}
 
-		const events = await this.prisma.guestStatusEvent.findMany({
-			where: {
-				recordedAt: { gte: from, lte: to },
-				status: { in: [GuestStatus.ATTENDING, GuestStatus.ATTENDING_WITH_SPOUSE] },
-				guest: { type: effectiveType },
-			},
-			select: { recordedAt: true },
-		})
+		const rows = await this.prisma.$queryRaw<Array<{ day: Date; count: number }>>(
+			Prisma.sql`
+				SELECT (e.recorded_at AT TIME ZONE 'UTC')::date AS day,
+					COUNT(*)::int AS count
+				FROM guest_status_events e
+				INNER JOIN guests g ON g.id = e.guest_id
+				WHERE e.recorded_at >= ${from}
+					AND e.recorded_at <= ${to}
+					AND e.status IN ('ATTENDING'::"GuestStatus", 'ATTENDING_WITH_SPOUSE'::"GuestStatus")
+					AND g.type = ${effectiveType}::"EventType"
+				GROUP BY 1
+				ORDER BY 1
+			`
+		)
 
 		const countsByDay = new Map<string, number>()
-		for (const e of events) {
-			const key = e.recordedAt.toISOString().slice(0, 10)
-			countsByDay.set(key, (countsByDay.get(key) ?? 0) + 1)
+		for (const row of rows) {
+			const key = row.day.toISOString().slice(0, 10)
+			countsByDay.set(key, Number(row.count))
 		}
 
 		const series: { date: string; confirmations: number }[] = []
@@ -315,76 +423,76 @@ export class GuestsService {
 	}
 
 	async getDuplicates(userScope: EventType | null) {
-		const where: Prisma.GuestWhereInput = { isDuplicate: true }
+		const whereGuest: Prisma.GuestWhereInput = {
+			tags: { some: { name: DUPLICATE_GUEST_TAG_NAME } },
+		}
 		if (userScope) {
-			where.type = userScope
+			whereGuest.type = userScope
 		}
 
 		return this.prisma.guest.findMany({
-			where,
+			where: whereGuest,
 			include: { tags: true },
 			orderBy: { fullName: 'asc' },
 		})
 	}
 
 	async detectDuplicatesForAll(userScope: EventType | null) {
-		const where: Prisma.GuestWhereInput = {}
-		if (userScope) {
-			where.type = userScope
-		}
+		const types: EventType[] = userScope
+			? [userScope]
+			: [EventType.WEDDING, EventType.BRIDE_FAREWELL]
 
-		const guests = await this.prisma.guest.findMany({
-			where,
-			select: { id: true, fullName: true, type: true },
-		})
+		let totalChecked = 0
+		let guestsTagged = 0
 
-		const groups = new Map<string, string[]>()
-		for (const guest of guests) {
-			const normalizedName = guest.fullName.trim().toLowerCase()
-			const key = `${guest.type}:${normalizedName}`
-			const ids = groups.get(key) ?? []
-			ids.push(guest.id)
-			groups.set(key, ids)
-		}
-
-		const duplicateIds = Array.from(groups.values())
-			.filter((ids) => ids.length > 1)
-			.flat()
-
-		await this.prisma.guest.updateMany({
-			where,
-			data: { isDuplicate: false },
-		})
-
-		if (duplicateIds.length > 0) {
-			await this.prisma.guest.updateMany({
-				where: { id: { in: duplicateIds } },
-				data: { isDuplicate: true },
+		for (const type of types) {
+			const tag = await this.prisma.tag.upsert({
+				where: {
+					name_type: { name: DUPLICATE_GUEST_TAG_NAME, type },
+				},
+				create: { name: DUPLICATE_GUEST_TAG_NAME, type },
+				update: {},
 			})
+
+			const guests = await this.prisma.guest.findMany({
+				where: { type },
+				select: {
+					id: true,
+					fullName: true,
+					partnerFullName: true,
+					tags: { select: { id: true, name: true } },
+				},
+			})
+
+			totalChecked += guests.length
+
+			const flagged = new Set<string>()
+			for (let i = 0; i < guests.length; i++) {
+				for (let j = i + 1; j < guests.length; j++) {
+					if (this.guestsAreDuplicatePair(guests[i], guests[j])) {
+						flagged.add(guests[i].id)
+						flagged.add(guests[j].id)
+					}
+				}
+			}
+
+			for (const id of flagged) {
+				const already = await this.prisma.guest.count({
+					where: { id, tags: { some: { id: tag.id } } },
+				})
+				if (already > 0) continue
+				await this.prisma.guest.update({
+					where: { id },
+					data: { tags: { connect: { id: tag.id } } },
+				})
+				guestsTagged += 1
+			}
 		}
 
 		return {
 			message: 'Duplicate detection completed',
-			totalChecked: guests.length,
-			duplicatesFound: duplicateIds.length,
-		}
-	}
-
-	private async detectDuplicates(fullName: string, type: EventType, excludeId: string) {
-		const duplicates = await this.prisma.guest.findMany({
-			where: {
-				fullName: { equals: fullName, mode: 'insensitive' },
-				type,
-				id: { not: excludeId },
-			},
-		})
-
-		if (duplicates.length > 0) {
-			const allIds = [excludeId, ...duplicates.map((d) => d.id)]
-			await this.prisma.guest.updateMany({
-				where: { id: { in: allIds } },
-				data: { isDuplicate: true },
-			})
+			totalChecked,
+			guestsTagged,
 		}
 	}
 }

@@ -165,7 +165,7 @@ export function InvitationPageClient() {
 				<motion.div className="relative z-10 mx-auto max-w-2xl" {...fadeIn}>
 					<SectionTitle title="Қатысуыңызды растаңыз" />
 					<p className="mb-12 text-center text-lg opacity-70">Қатысатыныңызды растаңыз</p>
-					<RSVPForm eventType="BRIDE_FAREWELL" />
+					<RSVPForm eventType="WEDDING" />
 				</motion.div>
 			</section>
 		</div>

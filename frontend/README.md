@@ -1,4 +1,4 @@
-# Wedding CRM frontend
+# Event CRM frontend
 
 Next.js App Router: public invitation pages and authenticated CRM under `/crm`.
 

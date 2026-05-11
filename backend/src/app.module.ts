@@ -18,16 +18,8 @@ import { HealthController } from './common/health/health.controller'
 			validationSchema: envValidationSchema,
 		}),
 		ThrottlerModule.forRoot([
-			{
-				name: 'short',
-				ttl: 60000,
-				limit: 10,
-			},
-			{
-				name: 'long',
-				ttl: 600000,
-				limit: 100,
-			},
+			{ name: 'short', ttl: 60_000, limit: 15 },
+			{ name: 'long', ttl: 600_000, limit: 60 },
 		]),
 		PrismaModule,
 		AuthModule,

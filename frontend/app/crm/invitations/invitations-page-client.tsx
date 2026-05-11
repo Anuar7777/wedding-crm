@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-import { useCrmEvent } from '@/lib/crm/event-context'
 import { useClientMounted } from '@/lib/use-client-mounted'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -12,7 +11,7 @@ function resolveInvitePath(type: EventType): string {
 	const bride = process.env.NEXT_PUBLIC_INVITE_URL_BRIDE
 	if (type === 'WEDDING' && wedding?.trim()) return wedding.trim()
 	if (type === 'BRIDE_FAREWELL' && bride?.trim()) return bride.trim()
-	return type === 'WEDDING' ? '/invitation' : '/wXneoFY1'
+	return type === 'WEDDING' ? '/wedding' : '/invitation'
 }
 
 function toAbsolute(urlOrPath: string): string {
@@ -22,7 +21,6 @@ function toAbsolute(urlOrPath: string): string {
 }
 
 export function InvitationsPageClient() {
-	const { effectiveEventType } = useCrmEvent()
 	const [qrSrc, setQrSrc] = React.useState<Record<EventType, string | null>>({
 		BRIDE_FAREWELL: null,
 		WEDDING: null,
@@ -64,7 +62,7 @@ export function InvitationsPageClient() {
 
 			<div className="grid gap-6 lg:grid-cols-2">
 				{(['WEDDING', 'BRIDE_FAREWELL'] as const).map((t) => {
-					const label = t === 'WEDDING' ? 'Свадьба' : 'Қыз ұзату'
+					const label = t === 'WEDDING' ? 'Той' : 'Қыз ұзату'
 					const abs = toAbsolute(resolveInvitePath(t))
 					return (
 						<Card key={t}>

@@ -11,6 +11,7 @@ import {
 	ParseUUIDPipe,
 } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler'
 import { EventType } from '@prisma/client'
 import { GuestsService } from './guests.service'
 import { CreateGuestDto } from './dto/create-guest.dto'
@@ -30,6 +31,11 @@ export class GuestsController {
 	constructor(private guestsService: GuestsService) {}
 
 	@Post()
+	@UseGuards(ThrottlerGuard)
+	@Throttle({
+		short: { limit: 15, ttl: 60_000 },
+		long: { limit: 60, ttl: 600_000 },
+	})
 	@ApiOperation({ summary: 'Create a new guest' })
 	create(@Body() dto: CreateGuestDto, @CurrentUser('scope') scope: EventType | null) {
 		return this.guestsService.create(dto, scope)
@@ -44,7 +50,11 @@ export class GuestsController {
 	}
 
 	@Get('stats')
-	@ApiOperation({ summary: 'Get guest statistics' })
+	@ApiOperation({
+		summary: 'Get guest statistics',
+		description:
+			'total = list rows (all statuses). totalAttendees = expected headcount among confirmations (ATTENDING + 2× ATTENDING_WITH_SPOUSE). unassigned = rows without a table. unassignedConfirmedSeats = seats still to place for confirmed guests without a table.',
+	})
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard, RolesGuard)
 	getStats(@Query() statsQuery: StatsQueryDto, @CurrentUser('scope') scope: EventType | null) {

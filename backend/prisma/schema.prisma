@@ -17,7 +17,6 @@ enum UserRole {
 }
 
 enum GuestStatus {
-  PENDING
   ATTENDING
   ATTENDING_WITH_SPOUSE
   DECLINED
@@ -54,7 +53,7 @@ model RefreshToken {
 model Guest {
   id              String      @id @default(uuid())
   fullName        String      @map("full_name")
-  status          GuestStatus @default(PENDING)
+  status          GuestStatus @default(ATTENDING)
   partnerFullName String?     @map("partner_full_name")
   type            EventType
 
@@ -64,11 +63,10 @@ model Guest {
   tags         Tag[]
   statusEvents GuestStatusEvent[]
 
-  isDuplicate Boolean  @default(false) @map("is_duplicate")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  @@index([type])
+  @@index([type, createdAt(sort: Desc)])
   @@index([status])
   @@index([tableId])
   @@map("guests")

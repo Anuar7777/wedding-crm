@@ -19,6 +19,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
+import { visibleTags } from '@/lib/crm/hidden-tags'
 
 const palette = [
 	'bg-emerald-100 text-emerald-800',
@@ -40,7 +41,9 @@ export function TagsPageClient() {
 		queryFn: () => apiJson<TagEntity[]>(`/api/tags${buildQuery({ type: effectiveEventType })}`),
 	})
 
-	const list = (tagsQuery.data ?? []).filter((t) => t.name.toLowerCase().includes(q.toLowerCase()))
+	const list = visibleTags(tagsQuery.data ?? []).filter((t) =>
+		t.name.toLowerCase().includes(q.toLowerCase())
+	)
 
 	const createMutation = useMutation({
 		mutationFn: () =>

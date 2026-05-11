@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Pencil, Trash2, Download } from 'lucide-react'
+import { Download, LayoutGrid, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { apiJson, buildQuery } from '@/lib/crm/api'
 import { useCrmEvent } from '@/lib/crm/event-context'
 import type {
@@ -16,6 +16,7 @@ import type {
 import { toast } from '@/lib/crm/toast'
 import { downloadGuestsExcel } from '@/lib/crm/excel-guests'
 import { guestStatusBadgeVariant, guestStatusLabel } from '@/lib/crm/guest-ui'
+import { useMediaMinMd } from '@/lib/use-media-min-md'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -42,13 +43,20 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
+	DropdownMenuSub,
+	DropdownMenuSubContent,
+	DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal } from 'lucide-react'
 
-const statuses: GuestStatus[] = ['PENDING', 'ATTENDING', 'ATTENDING_WITH_SPOUSE', 'DECLINED']
+const statuses: GuestStatus[] = ['ATTENDING', 'ATTENDING_WITH_SPOUSE', 'DECLINED']
+
+/** Table filter: all | unassigned | specific table UUID */
+const TABLE_FILTER_UNASSIGNED = '__unassigned__'
 
 export function GuestsPageClient() {
 	const { effectiveEventType } = useCrmEvent()
+	const isMd = useMediaMinMd()
+	const guestsPageSize = isMd ? 20 : 10
 	const qc = useQueryClient()
 	const router = useRouter()
 	const searchParams = useSearchParams()
@@ -58,18 +66,21 @@ export function GuestsPageClient() {
 	const [search, setSearch] = React.useState('')
 	const [status, setStatus] = React.useState<GuestStatus | ''>('')
 	const [tagId, setTagId] = React.useState('')
-	const [tableId, setTableId] = React.useState('')
+	const [tableFilter, setTableFilter] = React.useState('')
 	const [selected, setSelected] = React.useState<Set<string>>(() => new Set())
 
 	const [createOpen, setCreateOpen] = React.useState(false)
 	const [editGuest, setEditGuest] = React.useState<GuestEntity | null>(null)
 	const [bulkTagsOpen, setBulkTagsOpen] = React.useState(false)
 	const [bulkTagSelection, setBulkTagSelection] = React.useState<Set<string>>(() => new Set())
+	const [bulkTableOpen, setBulkTableOpen] = React.useState(false)
+	const [bulkTableId, setBulkTableId] = React.useState('')
 
 	const [formFullName, setFormFullName] = React.useState('')
-	const [formStatus, setFormStatus] = React.useState<GuestStatus>('PENDING')
+	const [formStatus, setFormStatus] = React.useState<GuestStatus>('ATTENDING')
 	const [formPartner, setFormPartner] = React.useState('')
 	const [formTags, setFormTags] = React.useState<Set<string>>(() => new Set())
+	const [formTableId, setFormTableId] = React.useState('')
 
 	React.useEffect(() => {
 		if (searchParams.get('create') !== '1') return
@@ -80,18 +91,37 @@ export function GuestsPageClient() {
 		return () => cancelAnimationFrame(id)
 	}, [searchParams, router])
 
+	React.useEffect(() => {
+		const id = requestAnimationFrame(() => setPage(1))
+		return () => cancelAnimationFrame(id)
+	}, [search, status, tagId, tableFilter, guestsPageSize])
+
 	const guestsQuery = useQuery({
-		queryKey: ['crm', 'guests', effectiveEventType, page, search, status, tagId, tableId],
+		queryKey: [
+			'crm',
+			'guests',
+			effectiveEventType,
+			page,
+			search,
+			status,
+			tagId,
+			tableFilter,
+			guestsPageSize,
+		],
 		queryFn: () =>
 			apiJson<PaginatedGuests>(
 				`/api/guests${buildQuery({
 					type: effectiveEventType,
 					page,
-					limit: 20,
+					limit: guestsPageSize,
 					search: search || undefined,
 					status: status || undefined,
 					tagIds: tagId || undefined,
-					tableId: tableId || undefined,
+					...(tableFilter === TABLE_FILTER_UNASSIGNED
+						? { unassigned: true }
+						: tableFilter
+							? { tableId: tableFilter }
+							: {}),
 				})}`
 			),
 	})
@@ -108,9 +138,10 @@ export function GuestsPageClient() {
 
 	const resetForm = React.useCallback(() => {
 		setFormFullName('')
-		setFormStatus('PENDING')
+		setFormStatus('ATTENDING')
 		setFormPartner('')
 		setFormTags(new Set())
+		setFormTableId('')
 	}, [])
 
 	const createMutation = useMutation({
@@ -175,6 +206,75 @@ export function GuestsPageClient() {
 			toast({ title: 'Ошибка', description: e.message, variant: 'destructive' }),
 	})
 
+	const assignTableMutation = useMutation({
+		mutationFn: ({ tableId, guestId }: { tableId: string; guestId: string }) =>
+			apiJson<GuestEntity>(`/api/tables/${tableId}/assign/${guestId}`, { method: 'POST' }),
+		onSuccess: () => {
+			toast({ title: 'Стол назначен' })
+			void qc.invalidateQueries({ queryKey: ['crm'] })
+		},
+		onError: (e: Error) =>
+			toast({ title: 'Ошибка', description: e.message, variant: 'destructive' }),
+	})
+
+	const unassignTableMutation = useMutation({
+		mutationFn: ({ tableId, guestId }: { tableId: string; guestId: string }) =>
+			apiJson<GuestEntity>(`/api/tables/${tableId}/assign/${guestId}`, { method: 'DELETE' }),
+		onSuccess: () => {
+			toast({ title: 'Стол снят' })
+			void qc.invalidateQueries({ queryKey: ['crm'] })
+		},
+		onError: (e: Error) =>
+			toast({ title: 'Ошибка', description: e.message, variant: 'destructive' }),
+	})
+
+	const bulkTableMutation = useMutation({
+		mutationFn: async ({ ids, tableId }: { ids: string[]; tableId: string }) => {
+			const errors: string[] = []
+			for (const guestId of ids) {
+				try {
+					await apiJson(`/api/tables/${tableId}/assign/${guestId}`, { method: 'POST' })
+				} catch (e) {
+					errors.push(e instanceof Error ? e.message : String(e))
+				}
+			}
+			return { errors }
+		},
+		onSuccess: ({ errors }) => {
+			setBulkTableOpen(false)
+			setBulkTableId('')
+			setSelected(new Set())
+			void qc.invalidateQueries({ queryKey: ['crm'] })
+			if (errors.length) {
+				toast({
+					title: 'Стол назначен частично',
+					description: errors.slice(0, 3).join('; ') + (errors.length > 3 ? '…' : ''),
+					variant: 'destructive',
+				})
+			} else {
+				toast({ title: 'Стол назначен выбранным гостям' })
+			}
+		},
+		onError: (e: Error) =>
+			toast({ title: 'Ошибка', description: e.message, variant: 'destructive' }),
+	})
+
+	const detectDupMutation = useMutation({
+		mutationFn: () =>
+			apiJson<{ guestsTagged: number; totalChecked: number }>('/api/guests/detect-duplicates', {
+				method: 'POST',
+			}),
+		onSuccess: (d) => {
+			toast({
+				title: 'Дубликаты',
+				description: `Проверено записей: ${d.totalChecked}. С тегом «Дубликаты» отмечено: ${d.guestsTagged}.`,
+			})
+			void qc.invalidateQueries({ queryKey: ['crm'] })
+		},
+		onError: (e: Error) =>
+			toast({ title: 'Ошибка', description: e.message, variant: 'destructive' }),
+	})
+
 	function openCreate() {
 		resetForm()
 		setCreateOpen(true)
@@ -186,20 +286,34 @@ export function GuestsPageClient() {
 		setFormStatus(g.status)
 		setFormPartner(g.partnerFullName ?? '')
 		setFormTags(new Set(g.tags.map((t) => t.id)))
+		setFormTableId(g.table?.id ?? '')
 	}
 
 	function submitGuest(mode: 'create' | 'edit') {
 		const tagIds = Array.from(formTags)
-		const body: Record<string, unknown> = {
-			fullName: formFullName.trim(),
-			type: effectiveEventType,
-			status: formStatus,
-			partnerFullName:
-				formStatus === 'ATTENDING_WITH_SPOUSE' ? formPartner.trim() || undefined : undefined,
-			tagIds: tagIds.length ? tagIds : undefined,
+		const partnerFullName =
+			formStatus === 'ATTENDING_WITH_SPOUSE' ? formPartner.trim() || undefined : undefined
+		if (mode === 'create') {
+			createMutation.mutate({
+				fullName: formFullName.trim(),
+				type: effectiveEventType,
+				status: formStatus,
+				partnerFullName,
+				tagIds: tagIds.length ? tagIds : undefined,
+				...(formTableId ? { tableId: formTableId } : {}),
+			})
+		} else if (editGuest) {
+			updateMutation.mutate({
+				id: editGuest.id,
+				body: {
+					fullName: formFullName.trim(),
+					status: formStatus,
+					partnerFullName,
+					tagIds,
+					tableId: formTableId || null,
+				},
+			})
 		}
-		if (mode === 'create') createMutation.mutate(body)
-		else if (editGuest) updateMutation.mutate({ id: editGuest.id, body })
 	}
 
 	function toggleRow(id: string) {
@@ -223,7 +337,11 @@ export function GuestsPageClient() {
 						search: search || undefined,
 						status: status || undefined,
 						tagIds: tagId || undefined,
-						tableId: tableId || undefined,
+						...(tableFilter === TABLE_FILTER_UNASSIGNED
+							? { unassigned: true }
+							: tableFilter
+								? { tableId: tableFilter }
+								: {}),
 					})}`
 				)
 				all.push(...res.data)
@@ -243,6 +361,7 @@ export function GuestsPageClient() {
 
 	const meta = guestsQuery.data?.meta
 	const rows = guestsQuery.data?.data ?? []
+	const pageLimit = meta?.limit ?? guestsPageSize
 
 	return (
 		<div className="space-y-6">
@@ -256,6 +375,14 @@ export function GuestsPageClient() {
 						<Download className="h-4 w-4" />
 						Excel
 					</Button>
+					<Button
+						variant="secondary"
+						type="button"
+						disabled={detectDupMutation.isPending}
+						onClick={() => detectDupMutation.mutate()}
+					>
+						Обнаружить дубликаты
+					</Button>
 					<Button onClick={openCreate}>+ Добавить гостя</Button>
 				</div>
 			</div>
@@ -264,9 +391,15 @@ export function GuestsPageClient() {
 				<div className="min-w-[200px] flex-1 space-y-1">
 					<Label>Поиск</Label>
 					<Input
-						placeholder="Поиск гостя…"
+						placeholder="Имя или пара — Enter для поиска"
 						value={searchInput}
 						onChange={(e) => setSearchInput(e.target.value)}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter') {
+								setSearch(searchInput.trim())
+								setPage(1)
+							}
+						}}
 					/>
 				</div>
 				<div className="space-y-1">
@@ -303,10 +436,11 @@ export function GuestsPageClient() {
 					<Label>Стол</Label>
 					<select
 						className="flex h-10 rounded-lg border border-border bg-card px-2 text-sm"
-						value={tableId}
-						onChange={(e) => setTableId(e.target.value)}
+						value={tableFilter}
+						onChange={(e) => setTableFilter(e.target.value)}
 					>
 						<option value="">Все столы</option>
+						<option value={TABLE_FILTER_UNASSIGNED}>Без стола</option>
 						{(tablesQuery.data ?? []).map((t) => (
 							<option key={t.id} value={t.id}>
 								Стол {t.number}
@@ -316,23 +450,13 @@ export function GuestsPageClient() {
 				</div>
 				<Button
 					type="button"
-					variant="secondary"
-					onClick={() => {
-						setSearch(searchInput.trim())
-						setPage(1)
-					}}
-				>
-					Применить
-				</Button>
-				<Button
-					type="button"
 					variant="outline"
 					onClick={() => {
 						setSearchInput('')
 						setSearch('')
 						setStatus('')
 						setTagId('')
-						setTableId('')
+						setTableFilter('')
 						setPage(1)
 					}}
 				>
@@ -345,6 +469,17 @@ export function GuestsPageClient() {
 					<span>Выбрано: {selected.size}</span>
 					<Button size="sm" variant="outline" onClick={() => setBulkTagsOpen(true)}>
 						Назначить теги
+					</Button>
+					<Button
+						size="sm"
+						variant="outline"
+						onClick={() => {
+							setBulkTableId('')
+							setBulkTableOpen(true)
+						}}
+					>
+						<LayoutGrid className="mr-1 h-3.5 w-3.5" />
+						Назначить стол
 					</Button>
 					<Button
 						size="sm"
@@ -392,22 +527,28 @@ export function GuestsPageClient() {
 										aria-label={`Выбрать ${g.fullName}`}
 									/>
 								</TableCell>
-								<TableCell className="font-medium">{g.fullName}</TableCell>
+								<TableCell className="max-w-[12rem] min-w-0 whitespace-normal break-words font-medium md:max-w-[18rem]">
+									{g.fullName}
+								</TableCell>
 								<TableCell>
 									<Badge variant={guestStatusBadgeVariant(g.status)}>
 										{guestStatusLabel(g.status)}
 									</Badge>
 								</TableCell>
-								<TableCell className="max-w-[220px] truncate text-muted-foreground">
+								<TableCell className="max-w-[12rem] min-w-0 whitespace-normal break-words text-muted-foreground md:max-w-[18rem]">
 									{g.status === 'ATTENDING_WITH_SPOUSE' && g.partnerFullName?.trim()
 										? g.partnerFullName.trim()
 										: '—'}
 								</TableCell>
 								<TableCell>{g.table ? `Стол ${g.table.number}` : '—'}</TableCell>
-								<TableCell>
+								<TableCell className="max-w-[10rem] min-w-0 md:max-w-[14rem]">
 									<div className="flex flex-wrap gap-1">
 										{g.tags.map((t) => (
-											<Badge key={t.id} variant="secondary">
+											<Badge
+												key={t.id}
+												variant="secondary"
+												className="whitespace-normal break-words"
+											>
 												{t.name}
 											</Badge>
 										))}
@@ -428,6 +569,37 @@ export function GuestsPageClient() {
 												<Pencil className="mr-2 h-4 w-4" />
 												Изменить
 											</DropdownMenuItem>
+											<DropdownMenuSub>
+												<DropdownMenuSubTrigger>
+													<LayoutGrid className="mr-2 h-4 w-4" />
+													Стол
+												</DropdownMenuSubTrigger>
+												<DropdownMenuSubContent className="max-h-64 overflow-y-auto">
+													{g.table ? (
+														<DropdownMenuItem
+															onClick={() =>
+																unassignTableMutation.mutate({
+																	tableId: g.table!.id,
+																	guestId: g.id,
+																})
+															}
+														>
+															Снять со стола {g.table.number}
+														</DropdownMenuItem>
+													) : null}
+													{(tablesQuery.data ?? []).map((t) => (
+														<DropdownMenuItem
+															key={t.id}
+															disabled={g.table?.id === t.id}
+															onClick={() =>
+																assignTableMutation.mutate({ tableId: t.id, guestId: g.id })
+															}
+														>
+															Стол {t.number}
+														</DropdownMenuItem>
+													))}
+												</DropdownMenuSubContent>
+											</DropdownMenuSub>
 											<DropdownMenuItem
 												className="text-destructive"
 												onClick={() => {
@@ -448,8 +620,8 @@ export function GuestsPageClient() {
 
 			<div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
 				<span>
-					Показано {(meta?.total ?? 0) === 0 ? 0 : (page - 1) * (meta?.limit ?? 20) + 1}–
-					{Math.min(page * (meta?.limit ?? 20), meta?.total ?? 0)} из {meta?.total ?? 0} гостей
+					Показано {(meta?.total ?? 0) === 0 ? 0 : (page - 1) * pageLimit + 1}–
+					{Math.min(page * pageLimit, meta?.total ?? 0)} из {meta?.total ?? 0} гостей
 				</span>
 				<div className="flex gap-2">
 					<Button
@@ -521,6 +693,21 @@ export function GuestsPageClient() {
 								))}
 							</div>
 						</div>
+						<div className="space-y-1">
+							<Label>Стол</Label>
+							<select
+								className="h-10 w-full rounded-lg border border-border bg-card px-2 text-sm"
+								value={formTableId}
+								onChange={(e) => setFormTableId(e.target.value)}
+							>
+								<option value="">Не назначен</option>
+								{(tablesQuery.data ?? []).map((t) => (
+									<option key={t.id} value={t.id}>
+										Стол {t.number}
+									</option>
+								))}
+							</select>
+						</div>
 					</div>
 					<DialogFooter>
 						<Button variant="outline" onClick={() => setCreateOpen(false)}>
@@ -585,6 +772,21 @@ export function GuestsPageClient() {
 								))}
 							</div>
 						</div>
+						<div className="space-y-1">
+							<Label>Стол</Label>
+							<select
+								className="h-10 w-full rounded-lg border border-border bg-card px-2 text-sm"
+								value={formTableId}
+								onChange={(e) => setFormTableId(e.target.value)}
+							>
+								<option value="">Не назначен</option>
+								{(tablesQuery.data ?? []).map((t) => (
+									<option key={t.id} value={t.id}>
+										Стол {t.number}
+									</option>
+								))}
+							</select>
+						</div>
 					</div>
 					<DialogFooter>
 						<Button variant="outline" onClick={() => setEditGuest(null)}>
@@ -634,6 +836,46 @@ export function GuestsPageClient() {
 								})
 							}
 							disabled={bulkTagsMutation.isPending}
+						>
+							Применить
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			<Dialog open={bulkTableOpen} onOpenChange={setBulkTableOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Стол для выбранных</DialogTitle>
+						<DialogDescription>
+							Каждому выбранному гостю будет назначен один и тот же стол (если хватит мест).
+						</DialogDescription>
+					</DialogHeader>
+					<div className="space-y-2 py-2">
+						<Label>Стол</Label>
+						<select
+							className="h-10 w-full rounded-lg border border-border bg-card px-2 text-sm"
+							value={bulkTableId}
+							onChange={(e) => setBulkTableId(e.target.value)}
+						>
+							<option value="">Выберите стол</option>
+							{(tablesQuery.data ?? []).map((t) => (
+								<option key={t.id} value={t.id}>
+									Стол {t.number} (своб. {t.availableSeats})
+								</option>
+							))}
+						</select>
+					</div>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setBulkTableOpen(false)}>
+							Отмена
+						</Button>
+						<Button
+							onClick={() => {
+								if (!bulkTableId) return
+								bulkTableMutation.mutate({ ids: Array.from(selected), tableId: bulkTableId })
+							}}
+							disabled={!bulkTableId || bulkTableMutation.isPending}
 						>
 							Применить
 						</Button>

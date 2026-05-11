@@ -26,4 +26,9 @@ export class CreateGuestDto {
 	@IsArray()
 	@IsUUID('4', { each: true })
 	tagIds?: string[]
+
+	@ApiPropertyOptional({ description: 'Assign to table after create (capacity checked)' })
+	@IsOptional()
+	@IsUUID('4')
+	tableId?: string
 }

@@ -2,7 +2,7 @@ export type EventType = 'BRIDE_FAREWELL' | 'WEDDING'
 
 export type UserRole = 'SUPERADMIN' | 'ADMIN'
 
-export type GuestStatus = 'PENDING' | 'ATTENDING' | 'ATTENDING_WITH_SPOUSE' | 'DECLINED'
+export type GuestStatus = 'ATTENDING' | 'ATTENDING_WITH_SPOUSE' | 'DECLINED'
 
 export type MeResponse = {
 	id: string
@@ -23,7 +23,7 @@ export type TableEntity = {
 	number: number
 	capacity: number
 	type: EventType
-	guests: { id: string; fullName: string; status: GuestStatus }[]
+	guests: { id: string; fullName: string; status: GuestStatus; partnerFullName: string | null }[]
 	occupiedSeats: number
 	availableSeats: number
 }
@@ -37,7 +37,6 @@ export type GuestEntity = {
 	tableId: string | null
 	table: { id: string; number: number } | null
 	tags: TagEntity[]
-	isDuplicate: boolean
 	createdAt: string
 	updatedAt: string
 }
@@ -49,7 +48,8 @@ export type PaginatedGuests = {
 
 export type GuestStats = {
 	total: number
-	pending: number
+	unassigned: number
+	unassignedConfirmedSeats: number
 	attending: number
 	attendingWithSpouse: number
 	declined: number

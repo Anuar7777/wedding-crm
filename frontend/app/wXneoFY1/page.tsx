@@ -1,11 +1,6 @@
-import type { Metadata } from 'next'
-import { InvitationPageClient } from './invitation-page-client'
+import { redirect } from 'next/navigation'
 
-export const metadata: Metadata = {
-	title: 'Kazakh Wedding Invitation',
-	description: 'Digital invitation and RSVP page.',
-}
-
-export default function InvitationRoute() {
-	return <InvitationPageClient />
+/** Legacy public URL for қыз ұзату invitation — CRM QR may still point here. */
+export default function LegacyUzatuInviteRedirect() {
+	redirect('/invitation')
 }

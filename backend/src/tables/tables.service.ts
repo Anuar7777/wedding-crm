@@ -42,7 +42,9 @@ export class TablesService {
 
 		const tables = await this.prisma.table.findMany({
 			where,
-			include: { guests: { select: { id: true, fullName: true, status: true } } },
+			include: {
+				guests: { select: { id: true, fullName: true, status: true, partnerFullName: true } },
+			},
 			orderBy: { number: 'asc' },
 		})
 
@@ -124,6 +126,13 @@ export class TablesService {
 
 		if (guest.type !== table.type) {
 			throw new ConflictException('Guest and table must belong to the same event type')
+		}
+
+		if (guest.tableId === tableId) {
+			return this.prisma.guest.findUniqueOrThrow({
+				where: { id: guestId },
+				include: { table: true, tags: true },
+			})
 		}
 
 		const neededSeats = guest.status === GuestStatus.ATTENDING_WITH_SPOUSE ? 2 : 1
