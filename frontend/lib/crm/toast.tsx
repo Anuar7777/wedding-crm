@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils'
 import { useClientMounted } from '@/lib/use-client-mounted'
 
-export type ToastVariant = 'default' | 'destructive'
+type ToastVariant = 'default' | 'destructive'
 
 type ToastItem = {
 	id: string
@@ -44,8 +44,10 @@ function getSnapshot() {
 	return memory
 }
 
+const SERVER_SNAPSHOT = [] as ToastItem[]
+
 function getServerSnapshot() {
-	return [] as ToastItem[]
+	return SERVER_SNAPSHOT
 }
 
 export function Toaster() {

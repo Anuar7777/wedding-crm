@@ -33,15 +33,17 @@ export function InvitationsPageClient() {
 		void (async () => {
 			const QR = await import('qrcode')
 			const types: EventType[] = ['WEDDING', 'BRIDE_FAREWELL']
-			const next: Record<EventType, string | null> = { BRIDE_FAREWELL: null, WEDDING: null }
-			for (const t of types) {
-				const abs = toAbsolute(resolveInvitePath(t))
-				try {
-					next[t] = await QR.toDataURL(abs, { margin: 1, width: 220 })
-				} catch {
-					next[t] = null
-				}
-			}
+			const entries = await Promise.all(
+				types.map(async (t) => {
+					const abs = toAbsolute(resolveInvitePath(t))
+					try {
+						return [t, await QR.toDataURL(abs, { margin: 1, width: 220 })] as const
+					} catch {
+						return [t, null] as const
+					}
+				})
+			)
+			const next = Object.fromEntries(entries) as Record<EventType, string | null>
 			if (!cancelled) setQrSrc(next)
 		})()
 		return () => {

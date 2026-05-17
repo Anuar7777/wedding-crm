@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 
 export function SettingsPageClient() {
-	const router = useRouter()
+	const { replace } = useRouter()
 	const { theme, setTheme } = useCrmTheme()
 
 	return (
@@ -51,7 +51,7 @@ export function SettingsPageClient() {
 						type="button"
 						onClick={() => {
 							clearTokens()
-							router.replace('/crm/login')
+							replace('/crm/login')
 						}}
 					>
 						Выйти

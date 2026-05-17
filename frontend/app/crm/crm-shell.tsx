@@ -226,7 +226,7 @@ function CrmInner({ children }: { children: React.ReactNode }) {
 
 function CrmAuthedLayout({ children }: { children: React.ReactNode }) {
 	const { theme } = useCrmTheme()
-	const router = useRouter()
+	const { replace } = useRouter()
 	const ready = useClientMounted()
 
 	const authed = !!getAccessToken()
@@ -241,14 +241,14 @@ function CrmAuthedLayout({ children }: { children: React.ReactNode }) {
 	React.useEffect(() => {
 		if (!ready) return
 		if (!authed) {
-			router.replace('/crm/login')
+			replace('/crm/login')
 			return
 		}
 		if (meQuery.isError) {
 			clearTokens()
-			router.replace('/crm/login')
+			replace('/crm/login')
 		}
-	}, [ready, authed, meQuery.isError, router])
+	}, [ready, authed, meQuery.isError, replace])
 
 	React.useEffect(() => {
 		if (!ready || !authed) return

@@ -20,6 +20,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { guestStatusBadgeVariant, guestStatusLabel } from '@/lib/crm/guest-ui'
 import { useMediaMinMd } from '@/lib/use-media-min-md'
+import { ClientDate } from '@/components/ui/client-date'
 
 function StatCard({
 	title,
@@ -131,7 +132,7 @@ export function HomePageClient() {
 									</TableCell>
 									<TableCell>{g.table ? `${g.table.number}` : '—'}</TableCell>
 									<TableCell className="text-muted-foreground">
-										{new Date(g.createdAt).toLocaleDateString('ru-RU')}
+										<ClientDate value={g.createdAt} />
 									</TableCell>
 								</TableRow>
 							))}

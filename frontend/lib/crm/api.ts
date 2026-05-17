@@ -1,7 +1,7 @@
 const ACCESS_KEY = 'crm_access_token'
 const REFRESH_KEY = 'crm_refresh_token'
 
-export function getApiBase(): string {
+function getApiBase(): string {
 	const raw = process.env.NEXT_PUBLIC_API_BASE_URL?.trim()
 	if (!raw) {
 		throw new Error('NEXT_PUBLIC_API_BASE_URL is not configured')

@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { z } from 'zod'
 import { apiJson, setTokens } from '@/lib/crm/api'
@@ -16,7 +17,21 @@ const schema = z.object({
 })
 
 export function CrmLoginForm() {
-	const router = useRouter()
+	return (
+		<Suspense
+			fallback={
+				<div className="flex min-h-screen items-center justify-center text-muted-foreground">
+					Загрузка…
+				</div>
+			}
+		>
+			<CrmLoginFormInner />
+		</Suspense>
+	)
+}
+
+function CrmLoginFormInner() {
+	const { replace } = useRouter()
 	const searchParams = useSearchParams()
 	const next = searchParams.get('next') || '/crm/home'
 	const [email, setEmail] = React.useState('')
@@ -42,7 +57,7 @@ export function CrmLoginForm() {
 			)
 			setTokens(tokens.accessToken, tokens.refreshToken)
 			toast({ title: 'Добро пожаловать' })
-			router.replace(next)
+			replace(next)
 		} catch (err) {
 			toast({
 				title: 'Ошибка входа',

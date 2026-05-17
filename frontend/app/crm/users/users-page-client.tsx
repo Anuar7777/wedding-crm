@@ -78,6 +78,7 @@ export function UsersPageClient() {
 			toast({ title: 'Пароль обновлён' })
 			setResetUser(null)
 			setNewPassword('')
+			void qc.invalidateQueries({ queryKey: ['crm', 'users'] })
 		},
 		onError: (e: Error) =>
 			toast({ title: 'Ошибка', description: e.message, variant: 'destructive' }),

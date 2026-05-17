@@ -48,7 +48,10 @@ export function CalendarWithHeart({
 
 				<div className="grid grid-cols-7 gap-2">
 					{calendarDays.map((day, index) => (
-						<div key={index} className="relative aspect-square flex items-center justify-center">
+						<div
+							key={day != null ? `day-${day}` : `pad-${index}`}
+							className="relative aspect-square flex items-center justify-center"
+						>
 							{day === highlightedDay ? (
 								<div className="relative flex h-full w-full items-center justify-center">
 									<svg className="absolute inset-0 h-full w-full" viewBox="0 0 50 50" fill="none">

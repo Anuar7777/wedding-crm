@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, LazyMotion, domAnimation, m } from 'motion/react'
 
 type TimeLeft = {
 	days: number
@@ -27,7 +27,7 @@ function calculateTimeLeft(): TimeLeft {
 }
 
 export function Countdown() {
-	const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft())
+	const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => calculateTimeLeft())
 
 	useEffect(() => {
 		const timer = setInterval(() => {
@@ -38,12 +38,14 @@ export function Countdown() {
 	}, [])
 
 	return (
-		<div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8">
-			<TimeUnit value={timeLeft.days} label="Күн" />
-			<TimeUnit value={timeLeft.hours} label="Сағат" />
-			<TimeUnit value={timeLeft.minutes} label="Минут" />
-			<TimeUnit value={timeLeft.seconds} label="Секунд" />
-		</div>
+		<LazyMotion features={domAnimation}>
+			<div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8">
+				<TimeUnit value={timeLeft.days} label="Күн" />
+				<TimeUnit value={timeLeft.hours} label="Сағат" />
+				<TimeUnit value={timeLeft.minutes} label="Минут" />
+				<TimeUnit value={timeLeft.seconds} label="Секунд" />
+			</div>
+		</LazyMotion>
 	)
 }
 
@@ -52,7 +54,7 @@ function TimeUnit({ value, label }: { value: number; label: string }) {
 		<div className="flex min-w-16 flex-col items-center gap-2 md:min-w-20">
 			<div className="linen-surface flex h-14 w-14 items-center justify-center rounded-full border border-gold sm:h-16 sm:w-16 md:h-20 md:w-20">
 				<AnimatePresence mode="wait">
-					<motion.span
+					<m.span
 						key={value}
 						initial={{ opacity: 0, y: 6 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -62,7 +64,7 @@ function TimeUnit({ value, label }: { value: number; label: string }) {
 						style={{ fontFamily: 'var(--font-serif)' }}
 					>
 						{value.toString().padStart(2, '0')}
-					</motion.span>
+					</m.span>
 				</AnimatePresence>
 			</div>
 			<span className="text-xs uppercase tracking-[0.2em] opacity-70 md:text-sm">{label}</span>

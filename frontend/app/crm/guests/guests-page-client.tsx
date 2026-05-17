@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { Suspense } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Download, LayoutGrid, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
@@ -47,6 +48,7 @@ import {
 	DropdownMenuSubContent,
 	DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu'
+import { ClientDate } from '@/components/ui/client-date'
 
 const statuses: GuestStatus[] = ['ATTENDING', 'ATTENDING_WITH_SPOUSE', 'DECLINED']
 
@@ -58,8 +60,6 @@ export function GuestsPageClient() {
 	const isMd = useMediaMinMd()
 	const guestsPageSize = isMd ? 20 : 10
 	const qc = useQueryClient()
-	const router = useRouter()
-	const searchParams = useSearchParams()
 
 	const [page, setPage] = React.useState(1)
 	const [searchInput, setSearchInput] = React.useState('')
@@ -81,15 +81,6 @@ export function GuestsPageClient() {
 	const [formPartner, setFormPartner] = React.useState('')
 	const [formTags, setFormTags] = React.useState<Set<string>>(() => new Set())
 	const [formTableId, setFormTableId] = React.useState('')
-
-	React.useEffect(() => {
-		if (searchParams.get('create') !== '1') return
-		const id = requestAnimationFrame(() => {
-			setCreateOpen(true)
-			router.replace('/crm/guests')
-		})
-		return () => cancelAnimationFrame(id)
-	}, [searchParams, router])
 
 	React.useEffect(() => {
 		const id = requestAnimationFrame(() => setPage(1))
@@ -230,14 +221,14 @@ export function GuestsPageClient() {
 
 	const bulkTableMutation = useMutation({
 		mutationFn: async ({ ids, tableId }: { ids: string[]; tableId: string }) => {
-			const errors: string[] = []
-			for (const guestId of ids) {
-				try {
-					await apiJson(`/api/tables/${tableId}/assign/${guestId}`, { method: 'POST' })
-				} catch (e) {
-					errors.push(e instanceof Error ? e.message : String(e))
-				}
-			}
+			const results = await Promise.allSettled(
+				ids.map((guestId) =>
+					apiJson(`/api/tables/${tableId}/assign/${guestId}`, { method: 'POST' })
+				)
+			)
+			const errors = results
+				.filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+				.map((r) => (r.reason instanceof Error ? r.reason.message : String(r.reason)))
 			return { errors }
 		},
 		onSuccess: ({ errors }) => {
@@ -325,29 +316,29 @@ export function GuestsPageClient() {
 
 	async function exportExcel() {
 		try {
-			const all: GuestEntity[] = []
-			let p = 1
-			let totalPages = 1
-			do {
-				const res = await apiJson<PaginatedGuests>(
-					`/api/guests${buildQuery({
-						type: effectiveEventType,
-						page: p,
-						limit: 100,
-						search: search || undefined,
-						status: status || undefined,
-						tagIds: tagId || undefined,
-						...(tableFilter === TABLE_FILTER_UNASSIGNED
-							? { unassigned: true }
-							: tableFilter
-								? { tableId: tableFilter }
-								: {}),
-					})}`
+			const guestQuery = {
+				type: effectiveEventType,
+				limit: 100,
+				search: search || undefined,
+				status: status || undefined,
+				tagIds: tagId || undefined,
+				...(tableFilter === TABLE_FILTER_UNASSIGNED
+					? { unassigned: true }
+					: tableFilter
+						? { tableId: tableFilter }
+						: {}),
+			}
+			const fetchPage = (page: number) =>
+				apiJson<PaginatedGuests>(`/api/guests${buildQuery({ ...guestQuery, page })}`)
+
+			const first = await fetchPage(1)
+			const all: GuestEntity[] = [...first.data]
+			if (first.meta.totalPages > 1) {
+				const rest = await Promise.all(
+					Array.from({ length: first.meta.totalPages - 1 }, (_, i) => fetchPage(i + 2))
 				)
-				all.push(...res.data)
-				totalPages = res.meta.totalPages
-				p++
-			} while (p <= totalPages)
+				for (const res of rest) all.push(...res.data)
+			}
 			await downloadGuestsExcel(all, `guests-${effectiveEventType}.xlsx`)
 			toast({ title: 'Файл скачан' })
 		} catch (e) {
@@ -365,6 +356,9 @@ export function GuestsPageClient() {
 
 	return (
 		<div className="space-y-6">
+			<Suspense fallback={null}>
+				<GuestsCreateFromUrl onOpen={() => setCreateOpen(true)} />
+			</Suspense>
 			<div className="flex flex-wrap items-end justify-between gap-4">
 				<div>
 					<h1 className="font-serif text-3xl font-semibold">Управление списком гостей</h1>
@@ -555,7 +549,7 @@ export function GuestsPageClient() {
 									</div>
 								</TableCell>
 								<TableCell className="text-muted-foreground">
-									{new Date(g.createdAt).toLocaleDateString('ru-RU')}
+									<ClientDate value={g.createdAt} />
 								</TableCell>
 								<TableCell>
 									<DropdownMenu>
@@ -884,4 +878,20 @@ export function GuestsPageClient() {
 			</Dialog>
 		</div>
 	)
+}
+
+function GuestsCreateFromUrl({ onOpen }: { onOpen: () => void }) {
+	const { replace } = useRouter()
+	const searchParams = useSearchParams()
+
+	React.useEffect(() => {
+		if (searchParams.get('create') !== '1') return
+		const id = requestAnimationFrame(() => {
+			onOpen()
+			replace('/crm/guests')
+		})
+		return () => cancelAnimationFrame(id)
+	}, [searchParams, replace, onOpen])
+
+	return null
 }
