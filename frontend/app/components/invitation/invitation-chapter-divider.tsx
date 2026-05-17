@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import carvingImage from '@/public/images/invitation/carving.webp'
+import carvingImage from '@/public/images/invitation/carving_between_chapters.webp'
 
 type InvitationChapterDividerProps = {
 	withTornEdge?: boolean
