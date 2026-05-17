@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/c
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import * as argon2 from 'argon2'
-import ms, { type StringValue } from 'ms'
+import { type StringValue } from 'ms'
 import { PrismaService } from '../prisma/prisma.service'
 import { LoginDto } from './dto/login.dto'
 
@@ -110,7 +110,7 @@ export class AuthService {
 
 		const tokenHash = await argon2.hash(refreshToken)
 		const expiresAt = new Date()
-		expiresAt.setTime(expiresAt.getTime() + ms(refreshExpiration))
+		expiresAt.setDate(expiresAt.getDate() + 7)
 
 		await this.prisma.refreshToken.create({
 			data: {

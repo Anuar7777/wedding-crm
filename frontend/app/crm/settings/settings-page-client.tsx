@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
-import { logoutCrm } from '@/lib/crm/api'
+import { clearTokens } from '@/lib/crm/api'
 import { useCrmTheme } from '@/lib/crm/event-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -50,10 +50,8 @@ export function SettingsPageClient() {
 						className="w-full"
 						type="button"
 						onClick={() => {
-							void (async () => {
-								await logoutCrm()
-								router.replace('/crm/login')
-							})()
+							clearTokens()
+							router.replace('/crm/login')
 						}}
 					>
 						Выйти

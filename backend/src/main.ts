@@ -3,7 +3,6 @@ import { type LogLevel, ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import helmet from 'helmet'
-import cookieParser from 'cookie-parser'
 import { AppModule } from './app.module'
 import { AllExceptionsFilter } from './common/logging/all-exceptions.filter'
 import { HttpLoggingInterceptor } from './common/logging/http-logging.interceptor'
@@ -29,16 +28,10 @@ async function bootstrap() {
 
 	app.use(helmet())
 
-	const corsOrigins =
-		process.env.CORS_ORIGIN?.split(',')
-			.map((o) => o.trim())
-			.filter((o) => o.length > 0) ?? []
 	app.enableCors({
-		origin: corsOrigins.length > 0 ? corsOrigins : ['http://localhost:3001'],
+		origin: process.env.CORS_ORIGIN?.split(',') ?? ['http://localhost:3001'],
 		credentials: true,
 	})
-
-	app.use(cookieParser())
 
 	app.use(requestIdMiddleware)
 
@@ -64,11 +57,6 @@ async function bootstrap() {
 		.setDescription('API for managing wedding & bride farewell events')
 		.setVersion('1.0')
 		.addBearerAuth()
-		.addCookieAuth('refresh', {
-			type: 'apiKey',
-			in: 'cookie',
-			name: process.env.REFRESH_COOKIE_NAME?.trim() || 'crm_refresh',
-		})
 		.build()
 
 	const document = SwaggerModule.createDocument(app, swaggerConfig)

@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { z } from 'zod'
-import { apiJson, setAccessToken } from '@/lib/crm/api'
+import { apiJson, setTokens } from '@/lib/crm/api'
 import { toast } from '@/lib/crm/toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,12 +32,15 @@ export function CrmLoginForm() {
 		}
 		setLoading(true)
 		try {
-			const tokens = await apiJson<{ accessToken: string }>('/api/auth/login', {
-				method: 'POST',
-				body: JSON.stringify(parsed.data),
-				skipAuth: true,
-			})
-			setAccessToken(tokens.accessToken)
+			const tokens = await apiJson<{ accessToken: string; refreshToken: string }>(
+				'/api/auth/login',
+				{
+					method: 'POST',
+					body: JSON.stringify(parsed.data),
+					skipAuth: true,
+				}
+			)
+			setTokens(tokens.accessToken, tokens.refreshToken)
 			toast({ title: 'Добро пожаловать' })
 			router.replace(next)
 		} catch (err) {

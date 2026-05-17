@@ -14,7 +14,7 @@ Monorepo: NestJS API (`backend/`), Next.js frontend (`frontend/`), PostgreSQL vi
 
 3. Local development without the full stack:
    - Backend: `cp backend/.env.example backend/.env` and set `DATABASE_URL` to your Postgres instance.
-   - Frontend: `cp frontend/.env.example frontend/.env.local` and set `BACKEND_INTERNAL_URL` to your Nest URL (e.g. `http://127.0.0.1:3000`).
+   - Frontend: `cp frontend/.env.example frontend/.env.local` and set `NEXT_PUBLIC_API_BASE_URL`.
 
 ### Root `.env` keys (Docker Compose)
 
@@ -27,7 +27,7 @@ Monorepo: NestJS API (`backend/`), Next.js frontend (`frontend/`), PostgreSQL vi
 | `JWT_*`, `TELEGRAM_BOT_TOKEN`, `CORS_ORIGIN`, `LOG_*`                | Backend container environment.                                                                                                                                                                      |
 | `SEED_SUPERADMIN_EMAIL`, `SEED_SUPERADMIN_PASSWORD`                  | Optional. If both are set, the backend container runs `prisma db seed` after migrations and creates a `SUPERADMIN` when missing. Password must be at least 12 characters. Leave both empty to skip. |
 | `DEFAULT_RESET_PASSWORD`                                             | Optional. Backend exposes it to SuperAdmin CRM as the suggested value when resetting another user’s password. Leave empty to require typing a new password each time.                               |
-| `BACKEND_INTERNAL_URL`                                               | Optional. Nest URL for the Next.js `/api` proxy inside Docker (default in compose: `http://backend:3000`).                                                                                          |
+| `NEXT_PUBLIC_API_BASE_URL`                                           | Build argument for the production frontend image (browser-visible API base URL).                                                                                                                    |
 
 Use the compose file that matches your workflow (`docker-compose.yml` vs `docker-compose-dev.yml`); both expect the same root `.env` shape for shared variables.
 

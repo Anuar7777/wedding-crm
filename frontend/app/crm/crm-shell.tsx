@@ -16,7 +16,7 @@ import {
 	Sparkles,
 	Menu,
 } from 'lucide-react'
-import { apiJson, getAccessToken, logoutCrm } from '@/lib/crm/api'
+import { apiJson, clearTokens, getAccessToken } from '@/lib/crm/api'
 import type { EventType, MeResponse } from '@/lib/crm/types'
 import {
 	CrmEventProvider,
@@ -245,10 +245,8 @@ function CrmAuthedLayout({ children }: { children: React.ReactNode }) {
 			return
 		}
 		if (meQuery.isError) {
-			void (async () => {
-				await logoutCrm()
-				router.replace('/crm/login')
-			})()
+			clearTokens()
+			router.replace('/crm/login')
 		}
 	}, [ready, authed, meQuery.isError, router])
 
