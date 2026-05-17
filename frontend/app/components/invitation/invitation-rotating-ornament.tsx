@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { invitationImages } from '@/lib/invitation/assets'
 
 type InvitationRotatingOrnamentProps = {
 	className?: string
@@ -13,7 +14,7 @@ export function InvitationRotatingOrnament({ className }: InvitationRotatingOrna
 			<div className="pointer-events-none absolute top-1/2 right-0 z-0 w-[min(72vw,320px)] translate-x-1/2 -translate-y-1/2">
 				<div className="invitation-ornament-spin">
 					<Image
-						src="/images/invitation/thread_rotating_red.webp"
+						src={invitationImages.thread}
 						alt=""
 						width={400}
 						height={400}

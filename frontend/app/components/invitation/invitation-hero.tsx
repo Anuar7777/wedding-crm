@@ -1,11 +1,15 @@
 'use client'
 
-import Image from 'next/image'
+import Image, { type StaticImageData } from 'next/image'
 import { m } from 'motion/react'
 
-const heroImage = '/images/invitation/hero_invitation.webp'
+type InvitationHeroProps = {
+	title: string
+	subtitleLines: string[]
+	image: StaticImageData
+}
 
-export function InvitationHero() {
+export function InvitationHero({ title, subtitleLines, image }: InvitationHeroProps) {
 	return (
 		<section className="relative bg-background">
 			<m.div
@@ -16,7 +20,7 @@ export function InvitationHero() {
 			>
 				<div className="invitation-hero-frame relative aspect-923/1152 w-full overflow-visible">
 					<Image
-						src={heroImage}
+						src={image}
 						alt=""
 						fill
 						priority
@@ -29,14 +33,16 @@ export function InvitationHero() {
 					/>
 					<div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center text-white">
 						<h1 className="invitation-title text-5xl drop-shadow-md sm:text-6xl md:text-7xl">
-							Қарақат
+							{title}
 						</h1>
-						<p className="mt-3 text-sm font-medium tracking-[0.35em] drop-shadow-sm sm:text-base sm:tracking-[0.4em]">
-							СЫРҒА САЛУ
-						</p>
-						<p className="mt-3 text-sm font-medium tracking-[0.35em] drop-shadow-sm sm:text-base sm:tracking-[0.4em]">
-							ҚЫЗ ҰЗАТУ
-						</p>
+						{subtitleLines.map((line) => (
+							<p
+								key={line}
+								className="mt-3 text-sm font-medium tracking-[0.35em] drop-shadow-sm sm:text-base sm:tracking-[0.4em]"
+							>
+								{line}
+							</p>
+						))}
 					</div>
 					<div className="invitation-torn-edge invitation-torn-edge--hero" aria-hidden />
 				</div>

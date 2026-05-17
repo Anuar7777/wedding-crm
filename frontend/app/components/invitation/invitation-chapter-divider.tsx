@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import carvingImage from '@/public/images/invitation/carving_between_chapters.webp'
+import { invitationImages } from '@/lib/invitation/assets'
 
 type InvitationChapterDividerProps = {
 	withTornEdge?: boolean
@@ -13,10 +13,11 @@ export function InvitationChapterDivider({ withTornEdge = true }: InvitationChap
 			) : null}
 			<div className="flex w-full justify-center px-6">
 				<Image
-					src={carvingImage}
+					src={invitationImages.carving}
 					alt=""
 					width={320}
 					height={90}
+					style={{ width: 'auto', height: 'auto' }}
 					className="h-auto w-[min(320px,88vw)]"
 				/>
 			</div>

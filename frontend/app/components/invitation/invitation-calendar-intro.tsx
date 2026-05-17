@@ -4,19 +4,15 @@ import Image from 'next/image'
 import { m } from 'motion/react'
 import { CalendarWithHeart } from '@/app/components/invitation/calendar-with-heart'
 import { Ornament } from '@/app/components/invitation/ornament'
-
-type FadeInProps = {
-	initial: { opacity: number; y: number }
-	whileInView: { opacity: number; y: number }
-	viewport: { once: boolean; margin: string }
-	transition: { duration: number; ease: 'easeOut' }
-}
+import { invitationImages } from '@/lib/invitation/assets'
+import type { FadeInMotionProps, InvitationEventConfig } from '@/lib/invitation/types'
 
 type InvitationCalendarIntroProps = {
-	fadeIn: FadeInProps
+	fadeIn: FadeInMotionProps
+	calendar: InvitationEventConfig['calendar']
 }
 
-export function InvitationCalendarIntro({ fadeIn }: InvitationCalendarIntroProps) {
+export function InvitationCalendarIntro({ fadeIn, calendar }: InvitationCalendarIntroProps) {
 	return (
 		<section className="relative overflow-x-clip px-6 py-10 md:py-12">
 			<div
@@ -25,7 +21,7 @@ export function InvitationCalendarIntro({ fadeIn }: InvitationCalendarIntroProps
 			>
 				<div className="invitation-ornament-spin">
 					<Image
-						src="/images/invitation/thread_rotating_red.webp"
+						src={invitationImages.thread}
 						alt=""
 						width={400}
 						height={400}
@@ -41,13 +37,13 @@ export function InvitationCalendarIntro({ fadeIn }: InvitationCalendarIntroProps
 
 				<div className="text-center">
 					<CalendarWithHeart
-						monthLabel="Шілде"
-						yearLabel="2026"
-						firstDayOfMonth={2}
-						daysInMonth={31}
-						highlightedDay={18}
-						weekdayLabel="Сенбі"
-						timeLabel="13:00"
+						monthLabel={calendar.monthLabel}
+						yearLabel={calendar.yearLabel}
+						firstDayOfMonth={calendar.firstDayOfMonth}
+						daysInMonth={calendar.daysInMonth}
+						highlightedDay={calendar.highlightedDay}
+						weekdayLabel={calendar.weekdayLabel}
+						timeLabel={calendar.timeLabel}
 					/>
 					<Ornament compact />
 				</div>

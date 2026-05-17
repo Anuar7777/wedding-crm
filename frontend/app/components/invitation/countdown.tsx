@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, LazyMotion, domAnimation, m } from 'motion/react'
 
 type TimeLeft = {
@@ -10,9 +10,7 @@ type TimeLeft = {
 	seconds: number
 }
 
-const targetDate = new Date('2026-07-18T13:00:00')
-
-function calculateTimeLeft(): TimeLeft {
+function calculateTimeLeft(targetDate: Date): TimeLeft {
 	const difference = targetDate.getTime() - new Date().getTime()
 	if (difference <= 0) {
 		return { days: 0, hours: 0, minutes: 0, seconds: 0 }
@@ -26,16 +24,21 @@ function calculateTimeLeft(): TimeLeft {
 	}
 }
 
-export function Countdown() {
-	const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => calculateTimeLeft())
+type CountdownProps = {
+	targetIso: string
+}
+
+export function Countdown({ targetIso }: CountdownProps) {
+	const targetDate = useMemo(() => new Date(targetIso), [targetIso])
+	const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => calculateTimeLeft(targetDate))
 
 	useEffect(() => {
 		const timer = setInterval(() => {
-			setTimeLeft(calculateTimeLeft())
+			setTimeLeft(calculateTimeLeft(targetDate))
 		}, 1000)
 
 		return () => clearInterval(timer)
-	}, [])
+	}, [targetDate])
 
 	return (
 		<LazyMotion features={domAnimation}>

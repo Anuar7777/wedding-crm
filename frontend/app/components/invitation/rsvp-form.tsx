@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { FormEvent, useState } from 'react'
 import { createGuestFromInvitation, type EventType } from '@/lib/guests-api'
+import { invitationImages } from '@/lib/invitation/assets'
 
 type AttendanceOption = 'alone' | 'partner' | 'not-attending'
 
@@ -137,7 +138,7 @@ export function RSVPForm({
 			>
 				<span className="relative z-10">{isSubmitting ? 'Жіберілуде...' : 'Растау'}</span>
 				<Image
-					src="/images/share/halal.webp"
+					src={invitationImages.halal}
 					alt=""
 					width={56}
 					height={56}

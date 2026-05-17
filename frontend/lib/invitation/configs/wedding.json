@@ -1,0 +1,54 @@
+{
+	"id": "WEDDING",
+	"routePath": "/wedding",
+	"metadata": {
+		"title": "Ануар & Қарақат — Үйлену тойы",
+		"description": "Ануар мен Қарақаттың үйлену тойына шақыру",
+		"ogImageKey": "heroWedding",
+		"twitterDescription": "Сіздерді үйлену тойымыздың қадірлі қонағы болуға шақырамыз"
+	},
+	"hero": {
+		"title": "Ануар & Қарақат",
+		"subtitleLines": ["ҮЙЛЕНУ ТОЙЫ"],
+		"imageKey": "heroWedding"
+	},
+	"greeting": {
+		"heading": "Құрметті қонақтар!",
+		"guestList": "Құрметті ағайын-туыс, бауырлар, құда-жекжат, нағашы-жиен, бөлелер, дос-жаран, әріптестер және көршілер!",
+		"body": "Сіздерді Ануар мен Қарақаттың үйлену тойына арналған салтанатты ақ дастарханымыздың қадірлі қонағы болуға шақырамыз."
+	},
+	"calendar": {
+		"monthLabel": "Шілде",
+		"yearLabel": "2026",
+		"firstDayOfMonth": 2,
+		"daysInMonth": 31,
+		"highlightedDay": 26,
+		"weekdayLabel": "Жексенбі",
+		"timeLabel": "13:00"
+	},
+	"countdown": {
+		"targetIso": "2026-07-26T13:00:00"
+	},
+	"venue": {
+		"name": "[Мекен-жай атауы — TBD]",
+		"address": "[Мекен-жай — TBD]",
+		"latitude": 49.776987,
+		"longitude": 73.143865,
+		"mapTitle": "Той орны на карте",
+		"gisUrl": "https://2gis.kz/karaganda"
+	},
+	"hosts": {
+		"label": "Той иелері:",
+		"names": "[Той иелері — TBD]"
+	},
+	"rsvp": {
+		"sectionTitle": "Тойға келуіңізді растауыңызды сұраймыз!"
+	},
+	"closing": {
+		"title": "Келіңіздер, тойымыздың қадірлі қонағы болыңыздар!"
+	},
+	"audioSrc": "/audio/wedding.mp3",
+	"sections": {
+		"showDressCode": true
+	}
+}

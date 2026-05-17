@@ -1,0 +1,56 @@
+{
+	"id": "BRIDE_FAREWELL",
+	"routePath": "/invitation",
+	"metadata": {
+		"title": "Қарақат & Қыз ұзату тойы",
+		"description": "Қарақат & Қыз ұзату тойына шақыру",
+		"ogImageKey": "heroInvitation",
+		"twitterDescription": "Сіздерді ақ дастарханымыздың қадірлі қонағы болуға шақырамыз"
+	},
+	"hero": {
+		"title": "Қарақат",
+		"subtitleLines": ["СЫРҒА САЛУ", "ҚЫЗ ҰЗАТУ"],
+		"imageKey": "heroInvitation"
+	},
+	"greeting": {
+		"heading": "Құрметті қонақтар!",
+		"guestList": "Құрметті ағайын-туыс, бауырлар, құда-жекжат, нағашы-жиен, бөлелер, дос-жаран, әріптестер және көршілер!",
+		"bodyBeforeHighlight": "Сіздерді қызымыз ",
+		"highlightName": "Қарақаттың",
+		"bodyAfterHighlight": " ұзату тойына арналған салтанатты ақ дастарханымыздың қадірлі қонағы болуға шақырамыз."
+	},
+	"calendar": {
+		"monthLabel": "Шілде",
+		"yearLabel": "2026",
+		"firstDayOfMonth": 2,
+		"daysInMonth": 31,
+		"highlightedDay": 18,
+		"weekdayLabel": "Сенбі",
+		"timeLabel": "13:00"
+	},
+	"countdown": {
+		"targetIso": "2026-07-18T13:00:00"
+	},
+	"venue": {
+		"name": "Береке",
+		"address": "Қарағанды қаласы, Сатыбалдина көшесі, 11/4",
+		"latitude": 49.776987,
+		"longitude": 73.143865,
+		"mapTitle": "Береке банкет залы на карте Яндекс",
+		"gisUrl": "https://2gis.kz/karaganda/firm/70000001037715386/73.143865%2C49.776987?m=73.143816%2C49.776999%2F20"
+	},
+	"hosts": {
+		"label": "Той иелері:",
+		"names": "Ата-анасы Ерболды - Жанылсын және ағалары"
+	},
+	"rsvp": {
+		"sectionTitle": "Тойға келуіңізді растауыңызды сұраймыз!"
+	},
+	"closing": {
+		"title": "Келіңіздер, тойымыздың қадірлі қонағы болыңыздар!"
+	},
+	"audioSrc": "/audio/invitation.mp3",
+	"sections": {
+		"showDressCode": true
+	}
+}

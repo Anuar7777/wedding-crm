@@ -2,6 +2,8 @@
 
 import Image from 'next/image'
 import { LazyMotion, domAnimation, m } from 'motion/react'
+import { invitationImages } from '@/lib/invitation/assets'
+import type { FadeInMotionProps } from '@/lib/invitation/types'
 
 const PALETTE = [
 	'#1a1a1a',
@@ -15,7 +17,7 @@ const PALETTE = [
 ]
 
 type DressCodeSectionProps = {
-	fadeIn: Record<string, unknown>
+	fadeIn: FadeInMotionProps
 }
 
 export function DressCodeSection({ fadeIn }: DressCodeSectionProps) {
@@ -41,7 +43,7 @@ export function DressCodeSection({ fadeIn }: DressCodeSectionProps) {
 					</div>
 					<div className="mx-auto max-w-4xl">
 						<Image
-							src="/images/invitation/dress.webp"
+							src={invitationImages.dress}
 							alt="Мерекенің түстер үйлесімі"
 							width={1200}
 							height={480}
