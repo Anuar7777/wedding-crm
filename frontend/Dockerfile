@@ -18,7 +18,6 @@ COPY frontend ./frontend
 WORKDIR /app/frontend
 ARG NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
-RUN echo "API=$NEXT_PUBLIC_API_BASE_URL"
 RUN yarn build
 
 FROM node:22-alpine AS runner

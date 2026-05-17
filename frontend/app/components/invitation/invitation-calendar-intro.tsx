@@ -25,7 +25,7 @@ export function InvitationCalendarIntro({ fadeIn }: InvitationCalendarIntroProps
 			>
 				<div className="invitation-ornament-spin">
 					<Image
-						src="/invitation/thread_rotating_red.webp"
+						src="/images/invitation/thread_rotating_red.webp"
 						alt=""
 						width={400}
 						height={400}

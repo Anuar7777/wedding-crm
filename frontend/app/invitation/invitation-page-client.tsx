@@ -18,7 +18,7 @@ const Countdown = dynamic(
 )
 
 import birdsImage from '@/public/images/invitation/birds.webp'
-import ownersBackground from '@/public/images/invitation/owners_background_2.webp'
+import ownersBackground from '@/public/images/invitation/owners_background.webp'
 import { DressCodeSection } from '@/app/components/invitation/dress-code-section'
 import { InvitationAudioPlayer } from '@/app/components/invitation/invitation-audio-player'
 

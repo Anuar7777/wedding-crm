@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { m } from 'motion/react'
 
-const heroImage = '/invitation/hero_invitation.webp'
+const heroImage = '/images/invitation/hero_invitation.webp'
 
 export function InvitationHero() {
 	return (

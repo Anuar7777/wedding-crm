@@ -41,7 +41,7 @@ export function DressCodeSection({ fadeIn }: DressCodeSectionProps) {
 					</div>
 					<div className="mx-auto max-w-4xl">
 						<Image
-							src="/invitation/dress.webp"
+							src="/images/invitation/dress.webp"
 							alt="Мерекенің түстер үйлесімі"
 							width={1200}
 							height={480}

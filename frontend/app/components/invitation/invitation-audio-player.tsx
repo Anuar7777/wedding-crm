@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Pause, Play } from 'lucide-react'
 
-const DEFAULT_SRC = '/invitation/music.mp3'
+const DEFAULT_SRC = '/audio/invitation.mp3'
 
 type InvitationAudioPlayerProps = {
 	src?: string

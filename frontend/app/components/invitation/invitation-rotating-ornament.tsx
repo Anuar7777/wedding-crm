@@ -13,7 +13,7 @@ export function InvitationRotatingOrnament({ className }: InvitationRotatingOrna
 			<div className="pointer-events-none absolute top-1/2 right-0 z-0 w-[min(72vw,320px)] translate-x-1/2 -translate-y-1/2">
 				<div className="invitation-ornament-spin">
 					<Image
-						src="/invitation/thread_rotating_red.webp"
+						src="/images/invitation/thread_rotating_red.webp"
 						alt=""
 						width={400}
 						height={400}
