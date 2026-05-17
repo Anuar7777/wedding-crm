@@ -3,7 +3,16 @@
 import Image from 'next/image'
 import { LazyMotion, domAnimation, m } from 'motion/react'
 
-const PALETTE = ['#1a1a1a', '#3d2914', '#8b7355', '#e8dcc8', '#e8d5ce', '#8fa396', '#4a5c3a']
+const PALETTE = [
+	'#1a1a1a',
+	'#3d2914',
+	'#8b7355',
+	'#e8dcc8',
+	'#e8d5ce',
+	'#8fa396',
+	'#4a5c3a',
+	'#fde9f6',
+]
 
 type DressCodeSectionProps = {
 	fadeIn: Record<string, unknown>
@@ -21,7 +30,7 @@ export function DressCodeSection({ fadeIn }: DressCodeSectionProps) {
 						ДРЕСС-КОД
 					</h2>
 					<p className="mx-auto mb-10 max-w-xl text-sm leading-relaxed text-stone-600 md:text-base">
-						Мы будем очень рады, если вы поддержите цветовую гамму праздника:
+						Мерекенің түстер үйлесімін қолдасаңыздар өте қуанышты боламыз:
 					</p>
 					<div className="mb-12 flex flex-wrap items-center justify-center gap-4 md:gap-5">
 						{PALETTE.map((color) => (
@@ -35,8 +44,8 @@ export function DressCodeSection({ fadeIn }: DressCodeSectionProps) {
 					</div>
 					<div className="mx-auto max-w-4xl">
 						<Image
-							src="/invitation/dress-code-reference.jpeg"
-							alt="Примеры нарядов в палитре торжества"
+							src="/invitation/dress.webp"
+							alt="Мерекенің түстер үйлесімі"
 							width={1200}
 							height={480}
 							className="h-auto w-full rounded-xl object-contain"
