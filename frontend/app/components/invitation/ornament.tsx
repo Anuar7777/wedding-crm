@@ -1,6 +1,10 @@
-export function Ornament() {
+type OrnamentProps = {
+	compact?: boolean
+}
+
+export function Ornament({ compact = false }: OrnamentProps) {
 	return (
-		<div className="my-8 flex items-center justify-center gap-4">
+		<div className={`flex items-center justify-center gap-4 ${compact ? 'my-4' : 'my-8'}`}>
 			<div className="h-px w-16 bg-gradient-to-r from-transparent to-[var(--gold)]" />
 			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0" aria-hidden>
 				<path

@@ -20,19 +20,16 @@ type DressCodeSectionProps = {
 
 export function DressCodeSection({ fadeIn }: DressCodeSectionProps) {
 	return (
-		<section className="relative overflow-hidden bg-white px-6 py-20 md:py-28">
+		<section className="relative overflow-hidden bg-white px-6 py-10 md:py-14">
 			<LazyMotion features={domAnimation}>
 				<m.div className="relative z-10 mx-auto max-w-3xl text-center" {...fadeIn}>
-					<h2
-						className="mb-6 text-3xl tracking-[0.35em] text-stone-800 md:text-4xl"
-						style={{ fontFamily: 'var(--font-serif)', fontWeight: 600 }}
-					>
+					<h2 className="invitation-title mb-4 text-3xl tracking-[0.35em] text-stone-800 md:text-4xl">
 						ДРЕСС-КОД
 					</h2>
-					<p className="mx-auto mb-10 max-w-xl text-sm leading-relaxed text-stone-600 md:text-base">
+					<p className="mx-auto mb-6 max-w-xl text-sm leading-relaxed text-stone-600 md:text-base">
 						Мерекенің түстер үйлесімін қолдасаңыздар өте қуанышты боламыз:
 					</p>
-					<div className="mb-12 flex flex-wrap items-center justify-center gap-4 md:gap-5">
+					<div className="mb-8 flex flex-wrap items-center justify-center gap-4 md:gap-5">
 						{PALETTE.map((color) => (
 							<div
 								key={color}

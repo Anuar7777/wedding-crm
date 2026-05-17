@@ -92,6 +92,148 @@ body {
 	box-shadow: var(--shadow-soft);
 }
 
+@keyframes invitation-ornament-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.invitation-ornament-spin {
+	animation: invitation-ornament-spin 25s linear infinite;
+}
+
+@keyframes invitation-heart-beat {
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	14% {
+		transform: scale(1.12);
+	}
+	28% {
+		transform: scale(1);
+	}
+	42% {
+		transform: scale(1.12);
+	}
+	70% {
+		transform: scale(1);
+	}
+}
+
+.invitation-heart-beat {
+	transform-origin: center;
+	animation: invitation-heart-beat 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.invitation-ornament-spin {
+		animation: none;
+	}
+
+	.invitation-heart-beat {
+		animation: none;
+	}
+}
+
+.invitation-hero-frame {
+	overflow: visible;
+}
+
+.invitation-torn-edge {
+	position: relative;
+	height: 36px;
+	width: 100%;
+	background-color: var(--background);
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 36' preserveAspectRatio='none'%3E%3Cpath fill='%23fbf7f1' d='M0 36 L0 4 C60 18 100 2 160 14 C220 26 280 6 340 18 C400 30 460 8 520 20 C580 32 640 4 700 16 C760 28 820 10 880 22 C940 34 1000 6 1060 18 C1120 30 1160 12 1200 8 L1200 36 Z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+
+.invitation-torn-edge--top {
+	transform: rotate(180deg);
+	margin-bottom: -1px;
+}
+
+.invitation-torn-edge--hero {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 20;
+	height: 52px;
+	margin-top: 0;
+	transform: translateY(50%);
+	pointer-events: none;
+}
+
+.invitation-page {
+	--invitation-red: #9b1c1c;
+	--invitation-red-mid: #b52222;
+	--invitation-red-hover: #7a1515;
+	--invitation-red-active: #651111;
+}
+
+.invitation-page .invitation-title {
+	font-family: var(--font-script);
+	font-weight: 400;
+}
+
+.invitation-calendar-month {
+	font-family: var(--font-serif);
+	font-weight: 600;
+}
+
+.invitation-calendar-time {
+	font-family: var(--font-serif);
+}
+
+.invitation-page .invitation-calendar-month,
+.invitation-page .invitation-calendar-time {
+	font-family: var(--font-script);
+	font-weight: 400;
+}
+
+.invitation-page .invitation-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: none;
+	border-radius: 9999px;
+	background: linear-gradient(180deg, var(--invitation-red-mid) 0%, var(--invitation-red) 100%);
+	color: #fff;
+	font-weight: 500;
+	letter-spacing: 0.01em;
+	cursor: pointer;
+	user-select: none;
+	-webkit-tap-highlight-color: transparent;
+	box-shadow: 0 10px 28px rgba(155, 28, 28, 0.28);
+	transition:
+		transform 140ms ease,
+		background 140ms ease,
+		box-shadow 140ms ease,
+		filter 140ms ease;
+}
+
+.invitation-page .invitation-btn:hover:not(:disabled) {
+	background: linear-gradient(180deg, #a61f1f 0%, var(--invitation-red-hover) 100%);
+	filter: brightness(0.88);
+	box-shadow: 0 8px 22px rgba(122, 21, 21, 0.32);
+	transform: translateY(0);
+}
+
+.invitation-page .invitation-btn:active:not(:disabled) {
+	background: linear-gradient(180deg, #8a1818 0%, var(--invitation-red-active) 100%);
+	filter: brightness(0.82);
+	box-shadow: 0 4px 14px rgba(101, 17, 17, 0.28);
+	transform: translateY(2px) scale(0.98);
+}
+
+.invitation-page .invitation-btn:disabled {
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
 .ui-card {
 	border: 1px solid var(--border);
 	background: var(--card);

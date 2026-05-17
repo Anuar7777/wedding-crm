@@ -5,7 +5,11 @@ import { LazyMotion, domAnimation, m } from 'motion/react'
 import { MapPin } from 'lucide-react'
 import { RSVPForm } from '@/app/components/invitation/rsvp-form'
 import { Ornament } from '@/app/components/invitation/ornament'
-import { CalendarWithHeart } from '@/app/components/invitation/calendar-with-heart'
+import { InvitationHero } from '@/app/components/invitation/invitation-hero'
+import { InvitationChapterDivider } from '@/app/components/invitation/invitation-chapter-divider'
+import { InvitationRotatingOrnament } from '@/app/components/invitation/invitation-rotating-ornament'
+import { InvitationGreeting } from '@/app/components/invitation/invitation-greeting'
+import { InvitationCalendarIntro } from '@/app/components/invitation/invitation-calendar-intro'
 import { MapEmbed } from '@/app/components/invitation/map-embed'
 import dynamic from 'next/dynamic'
 
@@ -17,6 +21,9 @@ const Countdown = dynamic(
 import birdsImage from '@/public/invitation/birds.webp'
 import { DressCodeSection } from '@/app/components/invitation/dress-code-section'
 
+const invitationButtonClass =
+	'invitation-btn ui-focus mt-8 w-full gap-2 px-7 py-4 sm:w-auto sm:px-8'
+
 export function InvitationPageClient() {
 	const fadeIn = {
 		initial: { opacity: 0, y: 30 },
@@ -27,66 +34,26 @@ export function InvitationPageClient() {
 
 	return (
 		<LazyMotion features={domAnimation}>
-			<div className="min-h-screen bg-background text-foreground">
-				<section className="relative h-screen overflow-hidden">
-					<div className="absolute bottom-0 left-0 w-full flex flex-col items-center text-center pb-10 z-20 md:gap-3">
-						<Ornament />
-						<h1
-							className="text-5xl md:text-8xl text-luxury-gold"
-							style={{ fontFamily: 'var(--font-script)' }}
-						>
-							Қарақат
-						</h1>
-						<p className="mt-4 text-xl tracking-widest">Қыз ұзату</p>
-						<Ornament />
-					</div>
-				</section>
+			<div className="invitation-page min-h-screen bg-background text-foreground">
+				<InvitationHero />
+				<InvitationChapterDivider />
+				<InvitationGreeting fadeIn={fadeIn} />
+				<InvitationCalendarIntro fadeIn={fadeIn} />
 
-				<section className="relative overflow-hidden px-6 py-20 md:py-24">
-					<m.div
-						className="linen-surface luxury-card relative z-10 mx-auto max-w-3xl px-6 py-11 text-center sm:px-8 md:px-14 md:py-16"
-						{...fadeIn}
-					>
-						<Ornament />
-						<p className="mx-auto mb-6 max-w-2xl text-base leading-relaxed opacity-85 md:text-lg">
-							Құрметті ағайын-туыс, бауырлар, құда-жекжат, нағашы-жиен, бөлелер, дос-жаран,
-							әріптестер және көршілер!
-						</p>
-						<p className="mx-auto mb-6 max-w-2xl text-base leading-relaxed opacity-85 md:text-lg">
-							Сіздерді қызымыз Қарақаттың ұзату тойына арналған салтанатты ақ дастарханымыздың
-							қадірлі қонағы болуға шақырамыз.
-						</p>
-						<Ornament />
+				<section className="relative overflow-hidden from-background via-[#f4ece2] to-secondary px-6 py-12 md:py-14">
+					<m.div className="relative z-10 mx-auto max-w-4xl text-center" {...fadeIn}>
+						<SectionTitle title="Той салтанатына дейін" />
+						<Countdown />
 					</m.div>
 				</section>
 
-				<section className="relative overflow-hidden px-6 py-20 md:py-24">
-					<m.div className="relative z-10 mx-auto max-w-3xl text-center" {...fadeIn}>
-						<SectionTitle title="Қай күні?" />
-						<p className="mb-10 text-lg opacity-70">Уақыты: 13:00</p>
-						<CalendarWithHeart
-							monthLabel="Шілде"
-							yearLabel="2026"
-							firstDayOfMonth={2}
-							daysInMonth={31}
-							highlightedDay={18}
-							weekdayLabel="Сенбі"
-							timeLabel="13:00"
-						/>
-						<Ornament />
-					</m.div>
-				</section>
-
-				<section className="relative overflow-hidden px-6 py-20 md:py-24">
+				<section className="relative overflow-hidden px-6 py-10 md:py-12">
 					<m.div className="relative z-10 mx-auto max-w-4xl text-center" {...fadeIn}>
 						<SectionTitle title="Мекен-жайы" />
 						<div className="linen-surface luxury-card space-y-6 p-6 sm:p-7 md:p-10">
 							<p
-								className="text-3xl md:text-4xl"
-								style={{
-									fontFamily: 'var(--font-serif)',
-									color: 'var(--terracotta)',
-								}}
+								className="invitation-title text-3xl md:text-4xl"
+								style={{ color: 'var(--terracotta)' }}
 							>
 								Береке
 							</p>
@@ -106,7 +73,7 @@ export function InvitationPageClient() {
 										'_blank'
 									)
 								}
-								className="ui-button ui-button-primary ui-interactive ui-focus mt-8 w-full gap-2 px-7 py-4 sm:w-auto sm:px-8"
+								className={invitationButtonClass}
 							>
 								<MapPin className="h-5 w-5" />
 								<span>2GIS арқылы ашу</span>
@@ -115,41 +82,37 @@ export function InvitationPageClient() {
 					</m.div>
 				</section>
 
+				<InvitationChapterDivider withTornEdge={false} />
 				<DressCodeSection fadeIn={fadeIn} />
 
-				<section className="relative overflow-hidden from-background via-[#f4ece2] to-secondary px-6 py-24 md:py-28">
-					<m.div className="relative z-10 mx-auto max-w-4xl text-center" {...fadeIn}>
-						<SectionTitle title="Тойға дейін" />
-						<Countdown />
-					</m.div>
-				</section>
-
-				<section className="relative overflow-hidden px-6 py-20 md:py-24">
+				<section className="relative overflow-hidden px-6 py-10 md:py-12">
 					<m.div className="relative z-10 mx-auto max-w-2xl text-center" {...fadeIn}>
-						<Ornament />
+						<Ornament compact />
 						<p className="mb-4 text-lg opacity-60 md:text-xl">Той иелері</p>
 						<p
-							className="text-4xl md:text-5xl"
-							style={{ fontFamily: 'var(--font-serif)', color: 'var(--primary)' }}
+							className="invitation-title text-4xl md:text-5xl"
+							style={{ color: 'var(--primary)' }}
 						>
 							Ата-анасы Ерболды — Жанылсын және ағалары
 						</p>
-						<Ornament />
+						<Ornament compact />
 					</m.div>
 				</section>
 
-				<section className="relative overflow-hidden px-6 py-24 md:py-28">
+				<InvitationRotatingOrnament />
+
+				<section className="relative overflow-hidden px-6 py-12 md:py-14">
 					<m.div className="relative z-10 mx-auto max-w-2xl" {...fadeIn}>
 						<SectionTitle title="Тойға қатысатыныңызды растауыңызды сұраймыз!" />
-						<RSVPForm eventType="BRIDE_FAREWELL" />
+						<RSVPForm
+							eventType="BRIDE_FAREWELL"
+							submitButtonClassName="invitation-btn ui-focus w-full py-4 disabled:cursor-not-allowed disabled:opacity-60"
+						/>
 					</m.div>
 				</section>
 
-				<section className="relative overflow-hidden px-6 pb-20 md:py-24">
-					<h3
-						className="text-4xl md:text-5xl text-luxury-gold text-center mb-10"
-						style={{ fontFamily: 'var(--font-script)' }}
-					>
+				<section className="relative overflow-hidden px-6 pb-12 pt-8 md:pb-14 md:pt-10">
+					<h3 className="invitation-title mb-6 text-center text-4xl text-luxury-gold md:text-5xl">
 						Келіңіздер, тойымыздың қадірлі қонағы болыңыздар!
 					</h3>
 					<Image
@@ -157,7 +120,7 @@ export function InvitationPageClient() {
 						alt="birds"
 						width={1000}
 						height={1000}
-						className="w-full h-auto"
+						className="h-auto w-full"
 					/>
 				</section>
 			</div>
@@ -166,12 +129,5 @@ export function InvitationPageClient() {
 }
 
 function SectionTitle({ title }: { title: string }) {
-	return (
-		<h2
-			className="mb-10 text-4xl md:text-5xl text-center"
-			style={{ fontFamily: 'var(--font-serif)', fontWeight: 600 }}
-		>
-			{title}
-		</h2>
-	)
+	return <h2 className="invitation-title mb-6 text-center text-4xl md:text-5xl">{title}</h2>
 }

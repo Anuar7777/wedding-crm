@@ -30,10 +30,8 @@ export function CalendarWithHeart({
 
 	return (
 		<div className="mx-auto max-w-md">
-			<div className="mb-8 text-center">
-				<h3 className="mb-2 text-3xl md:text-4xl" style={{ fontFamily: 'var(--font-serif)' }}>
-					{monthLabel}
-				</h3>
+			<div className="mb-5 text-center">
+				<h3 className="invitation-calendar-month mb-2 text-3xl md:text-4xl">{monthLabel}</h3>
 				<p className="text-xl opacity-60">{yearLabel}</p>
 			</div>
 
@@ -54,15 +52,22 @@ export function CalendarWithHeart({
 						>
 							{day === highlightedDay ? (
 								<div className="relative flex h-full w-full items-center justify-center">
-									<svg className="absolute inset-0 h-full w-full" viewBox="0 0 50 50" fill="none">
-										<path
-											d="M25 42 C25 42 8 30 8 18 C8 13 11 10 15 10 C19 10 22 13 25 18 C28 13 31 10 35 10 C39 10 42 13 42 18 C42 30 25 42 25 42 Z"
-											stroke="var(--accent)"
-											strokeWidth="2.5"
-											fill="var(--accent)"
-											fillOpacity="0.15"
-										/>
-									</svg>
+									<div className="absolute inset-0 origin-center scale-[1.35]">
+										<svg
+											className="invitation-heart-beat h-full w-full origin-center"
+											viewBox="0 0 50 50"
+											fill="none"
+											aria-hidden
+										>
+											<path
+												d="M25 42 C25 42 8 30 8 18 C8 13 11 10 15 10 C19 10 22 13 25 18 C28 13 31 10 35 10 C39 10 42 13 42 18 C42 30 25 42 25 42 Z"
+												stroke="var(--accent)"
+												strokeWidth="3"
+												fill="var(--accent)"
+												fillOpacity="0.15"
+											/>
+										</svg>
+									</div>
 									<span
 										className="relative z-10 text-xl font-bold md:text-2xl"
 										style={{ color: 'var(--accent)' }}
@@ -82,9 +87,9 @@ export function CalendarWithHeart({
 				</div>
 			</div>
 
-			<div className="mt-6 space-y-2 text-center">
+			<div className="mt-4 space-y-2 text-center">
 				<p className="text-lg opacity-70">{weekdayLabel}</p>
-				<p className="text-2xl" style={{ fontFamily: 'var(--font-serif)', color: 'var(--accent)' }}>
+				<p className="invitation-calendar-time text-2xl" style={{ color: 'var(--accent)' }}>
 					{timeLabel}
 				</p>
 			</div>

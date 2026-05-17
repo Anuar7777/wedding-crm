@@ -13,9 +13,13 @@ const statusMap = {
 
 type RSVPFormProps = {
 	eventType?: EventType
+	submitButtonClassName?: string
 }
 
-export function RSVPForm({ eventType = 'BRIDE_FAREWELL' }: RSVPFormProps) {
+export function RSVPForm({
+	eventType = 'BRIDE_FAREWELL',
+	submitButtonClassName = 'ui-button ui-button-primary ui-interactive ui-focus w-full py-4 disabled:cursor-not-allowed disabled:opacity-60',
+}: RSVPFormProps) {
 	const [name, setName] = useState('')
 	const [partnerFullName, setPartnerFullName] = useState('')
 	const [attendance, setAttendance] = useState<AttendanceOption | ''>('')
@@ -127,7 +131,7 @@ export function RSVPForm({ eventType = 'BRIDE_FAREWELL' }: RSVPFormProps) {
 
 			<button
 				type="submit"
-				className="ui-button ui-button-primary ui-interactive ui-focus w-full py-4 disabled:cursor-not-allowed disabled:opacity-60"
+				className={submitButtonClassName}
 				disabled={!isFormValid || isSubmitting}
 			>
 				{isSubmitting ? 'Жіберілуде...' : 'Растау'}
