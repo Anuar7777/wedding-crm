@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { InvitationPageClient } from './invitation-page-client'
 
 const site = (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '')
-const imageUrl = `${site}/invitation/birds.webp`
+const imageUrl = `${site}/invitation/hero_invitation.webp`
 
 export const metadata: Metadata = {
 	metadataBase: new URL(site),

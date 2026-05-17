@@ -234,6 +234,44 @@ body {
 	opacity: 0.6;
 }
 
+.invitation-page .invitation-audio-btn {
+	position: fixed;
+	right: 1.25rem;
+	bottom: 1.25rem;
+	z-index: 50;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 3.5rem;
+	height: 3.5rem;
+	border: none;
+	border-radius: 9999px;
+	background: linear-gradient(180deg, var(--invitation-red-mid) 0%, var(--invitation-red) 100%);
+	color: #fff;
+	cursor: pointer;
+	user-select: none;
+	-webkit-tap-highlight-color: transparent;
+	box-shadow: 0 10px 28px rgba(155, 28, 28, 0.32);
+	transition:
+		transform 140ms ease,
+		background 140ms ease,
+		box-shadow 140ms ease,
+		filter 140ms ease;
+}
+
+.invitation-page .invitation-audio-btn:hover {
+	background: linear-gradient(180deg, #a61f1f 0%, var(--invitation-red-hover) 100%);
+	filter: brightness(0.88);
+	box-shadow: 0 8px 22px rgba(122, 21, 21, 0.36);
+}
+
+.invitation-page .invitation-audio-btn:active {
+	background: linear-gradient(180deg, #8a1818 0%, var(--invitation-red-active) 100%);
+	filter: brightness(0.82);
+	box-shadow: 0 4px 14px rgba(101, 17, 17, 0.3);
+	transform: translateY(2px) scale(0.96);
+}
+
 .ui-card {
 	border: 1px solid var(--border);
 	background: var(--card);

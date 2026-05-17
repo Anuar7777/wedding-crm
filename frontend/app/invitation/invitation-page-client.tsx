@@ -4,7 +4,6 @@ import Image from 'next/image'
 import { LazyMotion, domAnimation, m } from 'motion/react'
 import { MapPin } from 'lucide-react'
 import { RSVPForm } from '@/app/components/invitation/rsvp-form'
-import { Ornament } from '@/app/components/invitation/ornament'
 import { InvitationHero } from '@/app/components/invitation/invitation-hero'
 import { InvitationChapterDivider } from '@/app/components/invitation/invitation-chapter-divider'
 import { InvitationRotatingOrnament } from '@/app/components/invitation/invitation-rotating-ornament'
@@ -18,8 +17,10 @@ const Countdown = dynamic(
 	{ ssr: false }
 )
 
-import birdsImage from '@/public/invitation/birds.webp'
+import birdsImage from '@/public/images/invitation/birds.webp'
+import ownersBackground from '@/public/images/invitation/owners_background_2.webp'
 import { DressCodeSection } from '@/app/components/invitation/dress-code-section'
+import { InvitationAudioPlayer } from '@/app/components/invitation/invitation-audio-player'
 
 const invitationButtonClass =
 	'invitation-btn ui-focus mt-8 w-full gap-2 px-7 py-4 sm:w-auto sm:px-8'
@@ -46,6 +47,8 @@ export function InvitationPageClient() {
 						<Countdown />
 					</m.div>
 				</section>
+
+				<InvitationRotatingOrnament />
 
 				<section className="relative overflow-hidden px-6 py-10 md:py-12">
 					<m.div className="relative z-10 mx-auto max-w-4xl text-center" {...fadeIn}>
@@ -85,25 +88,30 @@ export function InvitationPageClient() {
 				<InvitationChapterDivider withTornEdge={false} />
 				<DressCodeSection fadeIn={fadeIn} />
 
-				<section className="relative overflow-hidden px-6 py-10 md:py-12">
-					<m.div className="relative z-10 mx-auto max-w-2xl text-center" {...fadeIn}>
-						<Ornament compact />
-						<p className="mb-4 text-lg opacity-60 md:text-xl">Той иелері</p>
-						<p
-							className="invitation-title text-4xl md:text-5xl"
-							style={{ color: 'var(--primary)' }}
-						>
-							Ата-анасы Ерболды — Жанылсын және ағалары
-						</p>
-						<Ornament compact />
+				<section className="relative w-full overflow-hidden">
+					<m.div className="relative w-full" {...fadeIn}>
+						<Image
+							src={ownersBackground}
+							alt=""
+							width={1414}
+							height={3000}
+							className="block h-auto w-full max-w-none"
+							sizes="100vw"
+						/>
+						<div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white sm:px-8">
+							<p className="mb-3 font-serif text-xl font-semibold tracking-[0.2em] uppercase md:text-2xl">
+								Той иелері:
+							</p>
+							<p className="invitation-title text-3xl md:text-5xl">
+								Ата-анасы <span className="whitespace-nowrap">Ерболды - Жанылсын</span> және ағалары
+							</p>
+						</div>
 					</m.div>
 				</section>
 
-				<InvitationRotatingOrnament />
-
 				<section className="relative overflow-hidden px-6 py-12 md:py-14">
 					<m.div className="relative z-10 mx-auto max-w-2xl" {...fadeIn}>
-						<SectionTitle title="Тойға қатысатыныңызды растауыңызды сұраймыз!" />
+						<SectionTitle title="Тойға келуіңізді растауыңызды сұраймыз!" />
 						<RSVPForm
 							eventType="BRIDE_FAREWELL"
 							submitButtonClassName="invitation-btn ui-focus w-full py-4 disabled:cursor-not-allowed disabled:opacity-60"
@@ -112,7 +120,7 @@ export function InvitationPageClient() {
 				</section>
 
 				<section className="relative overflow-hidden px-6 pb-12 pt-8 md:pb-14 md:pt-10">
-					<h3 className="invitation-title mb-6 text-center text-4xl text-luxury-gold md:text-5xl">
+					<h3 className="invitation-title mb-6 text-center text-4xl text-luxury-gold md:text-5xl leading-relaxed">
 						Келіңіздер, тойымыздың қадірлі қонағы болыңыздар!
 					</h3>
 					<Image
@@ -123,6 +131,8 @@ export function InvitationPageClient() {
 						className="h-auto w-full"
 					/>
 				</section>
+
+				<InvitationAudioPlayer src="/audio/invitation.mp3" />
 			</div>
 		</LazyMotion>
 	)

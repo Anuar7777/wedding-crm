@@ -32,6 +32,9 @@ export function InvitationHero() {
 							Қарақат
 						</h1>
 						<p className="mt-3 text-sm font-medium tracking-[0.35em] drop-shadow-sm sm:text-base sm:tracking-[0.4em]">
+							СЫРҒА САЛУ
+						</p>
+						<p className="mt-3 text-sm font-medium tracking-[0.35em] drop-shadow-sm sm:text-base sm:tracking-[0.4em]">
 							ҚЫЗ ҰЗАТУ
 						</p>
 					</div>

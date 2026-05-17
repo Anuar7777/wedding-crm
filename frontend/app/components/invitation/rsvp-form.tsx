@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { FormEvent, useState } from 'react'
 import { createGuestFromInvitation, type EventType } from '@/lib/guests-api'
 
@@ -131,10 +132,18 @@ export function RSVPForm({
 
 			<button
 				type="submit"
-				className={submitButtonClassName}
+				className={`${submitButtonClassName} relative overflow-visible`}
 				disabled={!isFormValid || isSubmitting}
 			>
-				{isSubmitting ? 'Жіберілуде...' : 'Растау'}
+				<span className="relative z-10">{isSubmitting ? 'Жіберілуде...' : 'Растау'}</span>
+				<Image
+					src="/images/share/halal.webp"
+					alt=""
+					width={56}
+					height={56}
+					className="pointer-events-none absolute right-0 top-1/2 z-20 size-18 translate-x-[-10%] -translate-y-2 object-contain drop-shadow-sm"
+					aria-hidden
+				/>
 			</button>
 		</form>
 	)
