@@ -16,11 +16,13 @@ const statusMap = {
 type RSVPFormProps = {
 	eventType?: EventType
 	submitButtonClassName?: string
+	showHalalBadge?: boolean
 }
 
 export function RSVPForm({
 	eventType = 'BRIDE_FAREWELL',
 	submitButtonClassName = 'ui-button ui-button-primary ui-interactive ui-focus w-full py-4 disabled:cursor-not-allowed disabled:opacity-60',
+	showHalalBadge = true,
 }: RSVPFormProps) {
 	const [name, setName] = useState('')
 	const [partnerFullName, setPartnerFullName] = useState('')
@@ -137,14 +139,16 @@ export function RSVPForm({
 				disabled={!isFormValid || isSubmitting}
 			>
 				<span className="relative z-10">{isSubmitting ? 'Жіберілуде...' : 'Растау'}</span>
-				<Image
-					src={invitationImages.halal}
-					alt=""
-					width={56}
-					height={56}
-					className="pointer-events-none absolute right-0 top-1/2 z-20 size-18 translate-x-[-10%] -translate-y-2 object-contain drop-shadow-sm"
-					aria-hidden
-				/>
+				{showHalalBadge ? (
+					<Image
+						src={invitationImages.halal}
+						alt=""
+						width={56}
+						height={56}
+						className="pointer-events-none absolute right-0 top-1/2 z-20 size-18 translate-x-[-10%] -translate-y-2 object-contain drop-shadow-sm"
+						aria-hidden
+					/>
+				) : null}
 			</button>
 		</form>
 	)

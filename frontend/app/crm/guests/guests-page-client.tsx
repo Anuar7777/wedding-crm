@@ -882,16 +882,19 @@ export function GuestsPageClient() {
 
 function GuestsCreateFromUrl({ onOpen }: { onOpen: () => void }) {
 	const { replace } = useRouter()
-	const searchParams = useSearchParams()
+	const { get } = useSearchParams()
+	const openCreateFromUrl = React.useEffectEvent(() => {
+		onOpen()
+	})
 
 	React.useEffect(() => {
-		if (searchParams.get('create') !== '1') return
+		if (get('create') !== '1') return
 		const id = requestAnimationFrame(() => {
-			onOpen()
+			openCreateFromUrl()
 			replace('/crm/guests')
 		})
 		return () => cancelAnimationFrame(id)
-	}, [searchParams, replace, onOpen])
+	}, [get, replace])
 
 	return null
 }

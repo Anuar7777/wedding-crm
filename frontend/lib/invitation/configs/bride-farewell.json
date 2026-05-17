@@ -41,7 +41,11 @@
 	},
 	"hosts": {
 		"label": "Той иелері:",
-		"names": "Ата-анасы Ерболды - Жанылсын және ағалары"
+		"nameParts": [
+			{ "text": "Ата-анасы " },
+			{ "text": "Ерболды - Жанылсын", "nowrap": true },
+			{ "text": " және ағалары" }
+		]
 	},
 	"rsvp": {
 		"sectionTitle": "Тойға келуіңізді растауыңызды сұраймыз!"
@@ -50,6 +54,12 @@
 		"title": "Келіңіздер, тойымыздың қадірлі қонағы болыңыздар!"
 	},
 	"audioSrc": "/audio/invitation.mp3",
+	"dressCode": {
+		"layout": "palette",
+		"title": "Дресс-код",
+		"lead": "Мерекенің түстер үйлесімін қолдасаңыздар өте қуанышты боламыз:",
+		"titleVariant": "cyrillic"
+	},
 	"sections": {
 		"showDressCode": true
 	}

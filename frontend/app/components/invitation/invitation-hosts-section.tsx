@@ -30,7 +30,20 @@ export function InvitationHostsSection({
 					<p className="mb-3 font-serif text-xl font-semibold tracking-[0.2em] uppercase md:text-2xl">
 						{hosts.label}
 					</p>
-					<p className="invitation-title text-3xl md:text-5xl">{hosts.names}</p>
+					<p className="invitation-title text-center text-3xl md:text-5xl">
+						{hosts.nameParts.map((part, partIndex) => {
+							const prev = partIndex > 0 ? hosts.nameParts[partIndex - 1] : null
+							const needsSpace = prev !== null && !/\s$/.test(prev.text) && !/^\s/.test(part.text)
+							const partKey = `${part.text}-${part.nowrap ? 'nowrap' : 'wrap'}`
+
+							return (
+								<span key={partKey}>
+									{needsSpace ? ' ' : null}
+									<span className={part.nowrap ? 'whitespace-nowrap' : undefined}>{part.text}</span>
+								</span>
+							)
+						})}
+					</p>
 				</div>
 			</m.div>
 		</section>

@@ -34,7 +34,7 @@ export function InvitationVenueSection({ fadeIn, venue }: InvitationVenueSection
 						className={invitationButtonClass}
 					>
 						<MapPin className="h-5 w-5" />
-						<span>2GIS арқылы ашу</span>
+						<span>{venue.mapOpenLabel ?? '2GIS арқылы ашу'}</span>
 					</button>
 				</div>
 			</m.div>

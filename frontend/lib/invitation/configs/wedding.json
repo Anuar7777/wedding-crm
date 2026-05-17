@@ -30,24 +30,41 @@
 		"targetIso": "2026-07-26T13:00:00"
 	},
 	"venue": {
-		"name": "[Мекен-жай атауы — TBD]",
-		"address": "[Мекен-жай — TBD]",
-		"latitude": 49.776987,
-		"longitude": 73.143865,
-		"mapTitle": "Той орны на карте",
-		"gisUrl": "https://2gis.kz/karaganda"
+		"name": "Алтын Арқа",
+		"address": "Жаңаарқа кенті, Сәдуақас көшесі, 74",
+		"latitude": 48.68907,
+		"longitude": 71.638467,
+		"mapTitle": "Алтын Арқа банкет залы Яндекс картасында",
+		"gisUrl": "https://2gis.kz/geo/71.638467%2C48.689070?m=71.638467%2C48.689070%2F18.4"
 	},
 	"hosts": {
 		"label": "Той иелері:",
-		"names": "[Той иелері — TBD]"
+		"nameParts": [{ "text": "Умитжан," }, { "text": "Жасулан - Оксана", "nowrap": true }]
 	},
 	"rsvp": {
-		"sectionTitle": "Тойға келуіңізді растауыңызды сұраймыз!"
+		"sectionTitle": "Тойға келуіңізді растауыңызды сұраймыз!",
+		"showHalalBadge": false
 	},
 	"closing": {
 		"title": "Келіңіздер, тойымыздың қадірлі қонағы болыңыздар!"
 	},
 	"audioSrc": "/audio/wedding.mp3",
+	"dressCode": {
+		"layout": "attire",
+		"titleImage": true,
+		"sides": [
+			{
+				"icon": "tuxedo",
+				"label": "ЕРЛЕР ҚАУЫМЫ:",
+				"lines": ["ҚАРА", "СМОКИНГ"]
+			},
+			{
+				"icon": "dress",
+				"label": "ӘЙЕЛДЕР ҚАУЫМЫ:",
+				"lines": ["АСПАН КӨК", "ТҮСТІ КӨЙЛЕК"]
+			}
+		]
+	},
 	"sections": {
 		"showDressCode": true
 	}

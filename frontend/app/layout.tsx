@@ -1,5 +1,11 @@
 import type { Metadata } from 'next'
-import { Bad_Script, Cormorant_Garamond, Geist_Mono, Noto_Sans } from 'next/font/google'
+import {
+	Bad_Script,
+	Cormorant_Garamond,
+	Geist_Mono,
+	Great_Vibes,
+	Noto_Sans,
+} from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
 
@@ -26,6 +32,12 @@ const badScript = Bad_Script({
 	weight: ['400'],
 })
 
+const greatVibes = Great_Vibes({
+	variable: '--font-great-vibes',
+	subsets: ['latin'],
+	weight: ['400'],
+})
+
 export const metadata: Metadata = {
 	title: 'Event CRM Frontend',
 	description: 'Invitation and CRM frontend.',
@@ -39,7 +51,7 @@ export default function RootLayout({
 	return (
 		<html
 			lang="kk-KZ"
-			className={`${notoSans.variable} ${geistMono.variable} ${cormorant.variable} ${badScript.variable} h-full antialiased`}
+			className={`${notoSans.variable} ${geistMono.variable} ${cormorant.variable} ${badScript.variable} ${greatVibes.variable} h-full antialiased`}
 		>
 			<body className="min-h-full flex flex-col">
 				<Providers>{children}</Providers>

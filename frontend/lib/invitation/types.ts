@@ -2,6 +2,30 @@ import type { StaticImageData } from 'next/image'
 import type { EventType } from '@/lib/guests-api'
 import type { HeroImageKey } from './assets'
 
+export type DressCodeSide = {
+	icon: 'tuxedo' | 'dress'
+	label: string
+	lines: string[]
+}
+
+export type DressCodePaletteConfig = {
+	layout: 'palette'
+	title: string
+	lead: string
+	titleVariant?: 'latin' | 'cyrillic'
+	colors?: string[]
+}
+
+export type DressCodeAttireConfig = {
+	layout: 'attire'
+	title?: string
+	titleImage?: boolean
+	titleVariant?: 'latin' | 'cyrillic'
+	sides: DressCodeSide[]
+}
+
+export type DressCodeConfig = DressCodePaletteConfig | DressCodeAttireConfig
+
 export type InvitationEventConfigJson = {
 	id: EventType
 	routePath: '/invitation' | '/wedding'
@@ -42,19 +66,25 @@ export type InvitationEventConfigJson = {
 		latitude: number
 		longitude: number
 		mapTitle: string
+		mapOpenLabel?: string
 		gisUrl: string
 	}
 	hosts: {
 		label: string
-		names: string
+		nameParts: Array<{
+			text: string
+			nowrap?: boolean
+		}>
 	}
 	rsvp: {
 		sectionTitle: string
+		showHalalBadge?: boolean
 	}
 	closing: {
 		title: string
 	}
 	audioSrc: string
+	dressCode?: DressCodeConfig
 	sections?: {
 		showDressCode?: boolean
 	}

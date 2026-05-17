@@ -4,6 +4,7 @@
 	--font-size: 16px;
 	--font-serif: var(--font-cormorant);
 	--font-script: var(--font-bad-script);
+	--font-invitation-display: var(--font-great-vibes);
 	--font-sans: var(--font-noto-sans);
 
 	--background: #fbf7f1;
@@ -177,6 +178,19 @@ body {
 .invitation-page .invitation-title {
 	font-family: var(--font-script);
 	font-weight: 400;
+}
+
+.invitation-page .invitation-script-heading {
+	font-family: var(--font-script);
+	font-size: clamp(2.5rem, 6vw, 3.75rem);
+	font-weight: 400;
+	letter-spacing: 0.02em;
+}
+
+.invitation-page .invitation-script-heading--latin {
+	font-family: var(--font-invitation-display);
+	font-size: clamp(3rem, 8vw, 4.5rem);
+	letter-spacing: 0.04em;
 }
 
 .invitation-calendar-month {

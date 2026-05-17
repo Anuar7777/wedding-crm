@@ -62,7 +62,7 @@ export function EventInvitationPage({ config }: EventInvitationPageProps) {
 				<InvitationVenueSection fadeIn={fadeIn} venue={config.venue} />
 				<InvitationChapterDivider withTornEdge={false} />
 
-				{showDressCode ? <DressCodeSection fadeIn={fadeIn} /> : null}
+				{showDressCode ? <DressCodeSection fadeIn={fadeIn} dressCode={config.dressCode} /> : null}
 
 				<InvitationHostsSection
 					fadeIn={fadeIn}
@@ -73,7 +73,11 @@ export function EventInvitationPage({ config }: EventInvitationPageProps) {
 				<section className="relative overflow-hidden px-6 py-12 md:py-14">
 					<m.div className="relative z-10 mx-auto max-w-2xl" {...fadeIn}>
 						<SectionTitle title={config.rsvp.sectionTitle} />
-						<RSVPForm eventType={config.id} submitButtonClassName={rsvpButtonClassName} />
+						<RSVPForm
+							eventType={config.id}
+							submitButtonClassName={rsvpButtonClassName}
+							showHalalBadge={config.rsvp.showHalalBadge !== false}
+						/>
 					</m.div>
 				</section>
 
