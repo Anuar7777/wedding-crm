@@ -55,6 +55,7 @@
 	"dressCode": {
 		"layout": "attire",
 		"titleImage": true,
+		"lead": "Мерекенің түстер үйлесімін қолдасаңыздар өте қуанышты боламыз:",
 		"sides": [
 			{
 				"icon": "tuxedo",

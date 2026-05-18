@@ -21,6 +21,7 @@ export type DressCodeAttireConfig = {
 	title?: string
 	titleImage?: boolean
 	titleVariant?: 'latin' | 'cyrillic'
+	lead?: string
 	sides: DressCodeSide[]
 }
 

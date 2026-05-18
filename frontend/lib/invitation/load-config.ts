@@ -80,6 +80,7 @@ const invitationEventConfigSchema = z.object({
 				title: z.string().min(1).optional(),
 				titleImage: z.boolean().optional(),
 				titleVariant: z.enum(['latin', 'cyrillic']).optional(),
+				lead: z.string().min(1).optional(),
 				sides: z
 					.array(
 						z.object({
