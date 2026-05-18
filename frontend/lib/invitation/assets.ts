@@ -1,6 +1,6 @@
 import type { StaticImageData } from 'next/image'
-import heroInvitation from '@/public/images/invitation/hero_invitation.webp'
-import heroWedding from '@/public/images/wedding/hero_wedding.webp'
+import heroInvitation from '@/public/images/invitation/hero_invitation.jpg'
+import heroWedding from '@/public/images/wedding/hero_wedding.jpg'
 import carving from '@/public/images/share/carving_between_chapters.webp'
 import thread from '@/public/images/share/thread_rotating_red.webp'
 import dress from '@/public/images/invitation/dress.webp'
