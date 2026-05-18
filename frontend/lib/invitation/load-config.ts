@@ -24,6 +24,8 @@ const invitationEventConfigSchema = z.object({
 		body: z.string().optional(),
 		bodyBeforeHighlight: z.string().optional(),
 		highlightName: z.string().optional(),
+		highlightNames: z.array(z.string().min(1)).min(1).optional(),
+		highlightSeparator: z.string().optional(),
 		bodyAfterHighlight: z.string().optional(),
 	}),
 	calendar: z.object({

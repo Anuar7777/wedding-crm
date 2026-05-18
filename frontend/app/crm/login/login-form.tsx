@@ -32,8 +32,8 @@ export function CrmLoginForm() {
 
 function CrmLoginFormInner() {
 	const { replace } = useRouter()
-	const { get } = useSearchParams()
-	const next = get('next') || '/crm/home'
+	const searchParams = useSearchParams()
+	const next = searchParams.get('next') || '/crm/home'
 	const [email, setEmail] = React.useState('')
 	const [password, setPassword] = React.useState('')
 	const [loading, setLoading] = React.useState(false)

@@ -4,7 +4,7 @@ import heroWedding from '@/public/images/wedding/hero_wedding.webp'
 import carving from '@/public/images/share/carving_between_chapters.webp'
 import thread from '@/public/images/share/thread_rotating_red.webp'
 import dress from '@/public/images/invitation/dress.webp'
-import dressTitle from '@/public/images/wedding/dress.webp'
+import dressWedding from '@/public/images/wedding/dress.webp'
 import birds from '@/public/images/share/birds.webp'
 import ownersBackground from '@/public/images/share/owners_background.webp'
 import halal from '@/public/images/share/halal.webp'
@@ -17,7 +17,7 @@ export const invitationImages = {
 	carving,
 	thread,
 	dress,
-	dressTitle,
+	dressWedding,
 	birds,
 	ownersBackground,
 	halal,

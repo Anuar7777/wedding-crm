@@ -39,8 +39,8 @@ const greatVibes = Great_Vibes({
 })
 
 export const metadata: Metadata = {
-	title: 'Event CRM Frontend',
-	description: 'Invitation and CRM frontend.',
+	title: 'Wedding CRM',
+	description: 'Той & Қыз ұзату тойын басқару жүйесі.',
 }
 
 export default function RootLayout({

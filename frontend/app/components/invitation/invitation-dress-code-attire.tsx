@@ -16,7 +16,7 @@ export function InvitationDressCodeAttire({ config, className }: InvitationDress
 		<div className={cn('flex flex-col items-center', className)}>
 			{showTitleImage ? (
 				<Image
-					src={invitationImages.dressTitle}
+					src={invitationImages.dressWedding}
 					alt={config.title ?? 'Дресс-код'}
 					width={480}
 					height={120}

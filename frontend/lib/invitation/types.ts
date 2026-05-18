@@ -46,6 +46,8 @@ export type InvitationEventConfigJson = {
 		body?: string
 		bodyBeforeHighlight?: string
 		highlightName?: string
+		highlightNames?: string[]
+		highlightSeparator?: string
 		bodyAfterHighlight?: string
 	}
 	calendar: {
