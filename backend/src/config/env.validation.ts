@@ -15,7 +15,7 @@ export const envValidationSchema = Joi.object({
 	TRUST_PROXY: Joi.string().valid('true', 'false', '').default('false'),
 	JWT_ACCESS_SECRET: Joi.string().min(8).required(),
 	JWT_REFRESH_SECRET: Joi.string().min(8).required(),
-	JWT_ACCESS_EXPIRATION: Joi.string().default('15m'),
+	JWT_ACCESS_EXPIRATION: Joi.string().default('1h'),
 	JWT_REFRESH_EXPIRATION: Joi.string().default('7d'),
 	TELEGRAM_BOT_TOKEN: Joi.string().allow('').default(''),
 	PORT: Joi.number().default(3000),
